@@ -1,0 +1,85 @@
+// Comments
+
+/*
+    /*
+        Multi-Layered Comments
+    */
+*/
+
+
+// Strings
+"String with \e escape characters"
+
+// Numerics
+-5, 6666.555, 7
+
+// Var Names
+
+
+
+
+// Example
+
+// https://github.com/noir-lang/noir/blob/master/examples/1/src/foo.nr
+mod foo;
+
+fn hello(x : pub Field) -> Field {
+    x
+}
+
+// https://github.com/noir-lang/noir/blob/master/examples/1/src/main.nr
+fn main(x : Field, y : pub Field) {
+    constrain x != foo::hello(y);
+}
+
+// https://github.com/noir-lang/noir/blob/master/examples/2/src/main.nr
+fn main(x : Field, y : Field) {
+    priv x_as_u8 = x as u8;
+    priv y_as_u8 = y as u8;
+    
+    constrain (x_as_u8 & y_as_u8) == y;
+}
+
+// https://github.com/noir-lang/noir/blob/master/examples/3/src/main.nr
+fn main(x : u8, y : Field) {
+    priv _z = x + (y as u8);
+}
+
+// https://github.com/noir-lang/noir/blob/master/examples/4/src/main.nr
+fn main(x : Field, y : Field) {
+    const _a = 1;
+    priv k = x + y;
+
+    let j = for _k in _a..100 {
+       priv z = x + k;
+       z
+    };
+
+    constrain k == j[1];
+}
+
+// https://github.com/noir-lang/noir/blob/master/examples/5/src/main.nr
+use dep::std;
+
+fn main(x : Field, result : [32]Field) {
+    let digest = std::hash::sha256([x as u8]);
+     
+    constrain digest == result;
+}
+
+// https://github.com/noir-lang/noir/blob/master/examples/6/src/main.nr
+use dep::std;
+
+fn main(x : [5]u8, result : pub [32]u8) {
+     let digest = std::hash::sha256(x);
+     
+     constrain digest == result;
+}
+
+// https://github.com/noir-lang/noir/blob/master/examples/7/src/main.nr
+use dep::std;
+
+fn main(x : [5]u8, result : [32]u8) {
+     let digest = std::hash::blake2s(x);
+     constrain digest == result;
+}
