@@ -1,31 +1,74 @@
 {
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
 	"name": "The Noir Programming Language",
-	"patterns": [
+	"patterns": [{
+			"include": "#comments"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#numeric"
+		},
 		{
 			"include": "#keywords"
 		},
 		{
-			"include": "#strings"
+			"include": "#input"
 		}
 	],
 	"repository": {
-		"keywords": {
+		"comments": {
 			"patterns": [{
-				"name": "keyword.control.nr",
-				"match": "\\b(if|while|for|return)\\b"
+				"begin": "\\/\\*",
+				"end": "\\*\\/",
+				"name": "comment.block.nr",
+				"patterns": [{
+					"include": "$self"
+				}]
+			}, {
+				"match": "\\/\\/.*\n",
+				"name": "comment.line.double-slash.nr"
 			}]
 		},
 		"strings": {
 			"name": "string.quoted.double.nr",
-			"begin": "\"",
-			"end": "\"",
-			"patterns": [
-				{
-					"name": "constant.character.escape.nr",
-					"match": "\\\\."
+			"match": "\"(.*?)(\n|(?<!\\\\)\")",
+			"captures": {
+				"1": {
+					"patterns": [{
+						"name": "constant.character.escape",
+						"match": "\\\\."
+					}]
 				}
-			]
+			}
+		},
+		"numeric": {
+			"patterns": [{
+				"name": "token.error-token.nr",
+				"match": "(\\-)?\\d+\\.\\d+(\\.|[a-zA-Z])"
+			}, {
+				"name": "constant.numeric.nr",
+				"match": "(\\-)?\\d+(\\.\\d+)?"
+			}]
+		},
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.nr",
+				"match": "\\b(fn|mod|use|struct|if|else|for|constrain)\\b"
+			}, {
+				"name": "keyword.nr",
+				"match": "\\b(const|priv|pub|in|as|let)\\b"
+			}]
+		},
+		"input": {
+			"patterns": [{
+				"name": "support.type.nr",
+				"match": "\\b((u|i)(8|16|32|64|128)|str|bool|Field)\\b"
+			}, {
+				"name": "variable.nr",
+				"match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+			}]
 		}
 	},
 	"scopeName": "source.nr"
