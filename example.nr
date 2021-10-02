@@ -18,6 +18,13 @@ u7, u4, u567585, [53]Field
 CustomType, customVariable,
 _CustomUnusedType, _custumUnusedVariable
 function(), Class(), _function()
+//structure<Hello, World <andEveryoneElse>> // THIS BREAKS: x < y
+
+// Import
+
+use x::y::z::{
+    w, v::a
+}
 
 // Structs
 struct structure {
@@ -42,7 +49,7 @@ struct TupleStruct (basically same, stuff going <on>)
 
 struct WithoutContent
 
-if () {} else if () {} else {}
+if xx {} else if yy {} else {}
 
 while () {}
 

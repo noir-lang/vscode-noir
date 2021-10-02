@@ -45,7 +45,7 @@
 			"captures": {
 				"1": {
 					"patterns": [{
-						"name": "constant.character.escape",
+						"name": "constant.character.escape.nr",
 						"match": "\\\\."
 					}]
 				}
@@ -61,8 +61,22 @@
 			}]
 		},
 		"syntax": {
-			"patterns": [
-				{
+			"patterns": [{
+					"begin": "\\b(mod|use)\\s+([a-zA-Z_][a-zA-Z0-9_]*(::[a-zA-Z_][a-zA-Z0-9_]*)*::)\\{",
+					"end": "\\}",
+					"beginCaptures": {
+						"1": {
+							"name": "keyword.control.nr"
+						},
+						"2": {
+							"name": "support.type.nr"
+						}
+					},
+					"patterns": [{
+						"match": "[a-zA-Z_(::)][a-zA-Z0-9_]*",
+						"name": "support.type.nr"
+					}]
+				}, {
 					"match": "\\b(mod|use)\\s+([a-zA-Z_][a-zA-Z0-9_]*(::[a-zA-Z_][a-zA-Z0-9_]*)*)",
 					"captures": {
 						"1": {
@@ -80,7 +94,7 @@
 							"name": "keyword.control.nr"
 						},
 						"2": {
-							"name": "support.function"
+							"name": "support.function.nr"
 						}
 					}
 				},
@@ -128,7 +142,7 @@
 							"name": "keyword.control.nr"
 						},
 						"2": {
-							"name": "support.type"
+							"name": "support.type.nr"
 						}
 					},
 					"patterns": [{
@@ -143,7 +157,7 @@
 							"name": "keyword.control.nr"
 						},
 						"2": {
-							"name": "support.type"
+							"name": "support.type.nr"
 						}
 					},
 					"patterns": [{
@@ -157,7 +171,7 @@
 							"name": "keyword.control.nr"
 						},
 						"2": {
-							"name": "support.type"
+							"name": "support.type.nr"
 						}
 					}
 				},
@@ -168,7 +182,7 @@
 							"name": "keyword.control.nr"
 						},
 						"2": {
-							"name": "support.type"
+							"name": "support.type.nr"
 						}
 					}
 				}
@@ -186,7 +200,7 @@
 		"input": {
 			"patterns": [{
 				"name": "support.type.nr",
-				"match": "\\b((u|i)\\d+|str|bool|Field)\\b"
+				"match": "\\b((u|i)\\d+|str|bool|Field|Witness)\\b"
 			}, {
 				"name": "support.type.nr",
 				"match": "\\b(_*[A-Z][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*::)\\b"
@@ -195,7 +209,7 @@
 				"end": "\\)",
 				"beginCaptures": {
 					"1": {
-						"name": "support.function"
+						"name": "support.function.nr"
 					}
 				},
 				"patterns": [{
@@ -212,12 +226,12 @@
 				"end": "([a-zA-Z_][a-zA-Z0-9_]*)|,",
 				"beginCaptures": {
 					"0": {
-						"name": "support.type.property-name"
+						"name": "support.type.property-name.nr"
 					}
 				},
 				"endCaptures": {
 					"1": {
-						"name": "support.type"
+						"name": "support.type.nr"
 					}
 				},
 				"patterns": [{
@@ -227,8 +241,21 @@
 				"begin": "<",
 				"end": ">",
 				"patterns": [{
-					"match": "[a-zA-Z_][a-zA-Z0-9_]*",
-					"name": "support.type"
+					"include": "#--struct-types"
+				}]
+			}, {
+				"include": "#comments"
+			}]
+		},
+		"--struct-types": {
+			"patterns": [{
+				"match": "[a-zA-Z_][a-zA-Z0-9_]*",
+				"name": "support.type.nr"
+			}, {
+				"begin": "<",
+				"end": ">",
+				"patterns": [{
+					"include": "#--struct-types"
 				}]
 			}, {
 				"include": "#comments"
