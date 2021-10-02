@@ -19,11 +19,35 @@ CustomType, customVariable,
 _CustomUnusedType, _custumUnusedVariable
 function(), Class(), _function()
 
+// Structs
+struct structure {
+    Var   : type,  // First-Letter-Capitalization ignored
+    Var2  : type
 
+    x // Over
+    : // Many
+    y // Lines
 
+    // Note! ":" is simply ignored by the syntax highlighter:
+    x y()
 
+    // Comma separates:
+    x, y, z,
 
+    // Types in Types
+    val : Struct<More, Structs>
+}
 
+struct TupleStruct (basically same, stuff going <on>)
+
+struct WithoutContent
+
+if () {} else if () {} else {}
+
+while () {}
+
+let x = true
+let y = false
 
 // Example
 
@@ -90,3 +114,4 @@ fn main(x : [5]u8, result : [32]u8) {
      let digest = std::hash::blake2s(x);
      constrain digest == result;
 }
+
