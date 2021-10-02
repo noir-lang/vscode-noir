@@ -10,6 +10,12 @@
         "Programming Languages"
     ],
     "contributes": {
+        "snippets": [
+            {
+                "language": "nr",
+                "path": "./snippets.json"
+            }
+        ],
         "languages": [{
             "id": "nr",
             "aliases": ["The Noir Programming Language", "nr"],
