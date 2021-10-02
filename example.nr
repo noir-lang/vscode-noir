@@ -20,6 +20,11 @@ _CustomUnusedType, _custumUnusedVariable
 function(), Class(), _function()
 //structure<Hello, World <andEveryoneElse>> // THIS BREAKS: x < y
 
+#[builtin(hello)]
+fn WithComment() {
+    
+}
+
 // Import
 
 use x::y::z::{
