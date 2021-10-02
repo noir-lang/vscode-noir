@@ -14,6 +14,13 @@
 -5, 6666.555, 7
 
 // Var Names
+u7, u4, u567585, [53]Field
+CustomType, customVariable,
+_CustomUnusedType, _custumUnusedVariable
+function(), Class(), _function()
+
+
+
 
 
 

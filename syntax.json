@@ -2,29 +2,37 @@
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
 	"name": "The Noir Programming Language",
 	"patterns": [{
-			"include": "#comments"
-		},
-		{
-			"include": "#strings"
-		},
-		{
-			"include": "#numeric"
-		},
-		{
-			"include": "#keywords"
-		},
-		{
-			"include": "#input"
-		}
-	],
+		"include": "#code"
+	}],
 	"repository": {
+		"code": {
+			"patterns": [{
+					"include": "#comments"
+				},
+				{
+					"include": "#strings"
+				},
+				{
+					"include": "#numeric"
+				},
+				{
+					"include": "#syntax"
+				},
+				{
+					"include": "#keywords"
+				},
+				{
+					"include": "#input"
+				}
+			]
+		},
 		"comments": {
 			"patterns": [{
 				"begin": "\\/\\*",
 				"end": "\\*\\/",
 				"name": "comment.block.nr",
 				"patterns": [{
-					"include": "$self"
+					"include": "#comments"
 				}]
 			}, {
 				"match": "\\/\\/.*\n",
@@ -52,6 +60,43 @@
 				"match": "(\\-)?\\d+(\\.\\d+)?"
 			}]
 		},
+		"syntax": {
+			"patterns": [
+				{
+					"match": "\\b(mod|use)\\s+([a-zA-Z_][a-zA-Z0-9_]*(::[a-zA-Z_][a-zA-Z0-9_]*)*)",
+					"captures": {
+						"1": {
+							"name": "keyword.control.nr"
+						},
+						"2": {
+							"name": "support.type.nr"
+						}
+					}
+				},
+				{
+					"match": "\\b(fn)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+					"captures": {
+						"1": {
+							"name": "keyword.control.nr"
+						},
+						"2": {
+							"name": "support.function"
+						}
+					}
+				},
+				{
+					"match": "\\b(const)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+					"captures": {
+						"1": {
+							"name": "keyword.nr"
+						},
+						"2": {
+							"name": "variable.other.constant"
+						}
+					}
+				}
+			]
+		},
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.nr",
@@ -64,10 +109,24 @@
 		"input": {
 			"patterns": [{
 				"name": "support.type.nr",
-				"match": "\\b((u|i)(8|16|32|64|128)|str|bool|Field)\\b"
+				"match": "\\b((u|i)\\d+|str|bool|Field)\\b"
+			}, {
+				"name": "support.type.nr",
+				"match": "\\b(_*[A-Z][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*::)\\b"
+			}, {
+				"begin": "\\b([a-z_][a-zA-Z0-9_]*)\\s*\\(",
+				"end": "\\)",
+				"beginCaptures": {
+					"1": {
+						"name": "support.function"
+					}
+				},
+				"patterns": [{
+					"include": "#code"
+				}]
 			}, {
 				"name": "variable.nr",
-				"match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+				"match": "\\b[a-z_][a-zA-Z0-9_]*\\b"
 			}]
 		}
 	},
