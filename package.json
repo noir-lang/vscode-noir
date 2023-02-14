@@ -25,7 +25,7 @@
         "grammars": [{
             "language": "nr",
             "scopeName": "source.nr",
-            "path": "./src/syntax.json"
+            "path": "./src/noir.tmLanguage.json"
         }]
     }
 }
