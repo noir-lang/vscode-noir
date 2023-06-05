@@ -1,31 +1,122 @@
 {
-    "name": "noir-programming-language-syntax-highlighter",
-    "displayName": "Noir Programming Language Syntax Highlighter",
-    "description": "A syntax highlighter for the Noir Programming Language",
+    "name": "vscode-noir",
+    "displayName": "Noir",
+    "description": "Noir support for Visual Studio Code",
     "version": "0.0.1",
+    "publisher": "noir-lang",
+    "keywords": [
+        "noir",
+        "noir-lang"
+    ],
     "engines": {
-        "vscode": "^1.60.0"
+        "vscode": "^1.67.0"
+    },
+    "license": "(MIT OR Apache-2.0)",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/noir-lang/vscode-noir"
+    },
+    "bugs": {
+        "url": "https://github.com/noir-lang/vscode-noir/issues"
     },
     "categories": [
         "Programming Languages"
     ],
+    "activationEvents": [
+        "onLanguage:noir"
+    ],
+    "main": "./out/extension",
     "contributes": {
+        "commands": [
+            {
+                "command": "noir.restart",
+                "title": "Noir: Restart Language Server"
+            }
+        ],
         "snippets": [
             {
                 "language": "nr",
-                "path": "./src/snippets.json"
+                "path": "./snippets/snippets.json"
             }
         ],
-        "languages": [{
-            "id": "nr",
-            "aliases": ["The Noir Programming Language", "nr"],
-            "extensions": [".nr"],
-            "configuration": "./src/config.json"
-        }],
-        "grammars": [{
-            "language": "nr",
-            "scopeName": "source.nr",
-            "path": "./src/noir.tmLanguage.json"
-        }]
+        "languages": [
+            {
+                "id": "noir",
+                "aliases": [
+                    "Noir",
+                    "noir"
+                ],
+                "extensions": [
+                    ".nr"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "noir",
+                "scopeName": "source.nr",
+                "path": "./syntaxes/noir.tmLanguage.json"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Noir Language Server configuration",
+            "properties": {
+                "noir.nargoFlags": {
+                    "scope": "resource",
+                    "type": "string",
+                    "description": "Space-separated list of flags to pass to the nargo CLI"
+                },
+                "noir.nargoPath": {
+                    "scope": "resource",
+                    "type": "string",
+                    "description": "Absolute path to the nargo CLI (detected in PATH if not specified)"
+                },
+                "noir.enableLSP": {
+                    "scope": "resource",
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable the language server"
+                },
+                "noir.trace.server": {
+                    "scope": "resource",
+                    "type": "string",
+                    "enum": [
+                        "off",
+                        "messages",
+                        "verbose"
+                    ],
+                    "default": "off",
+                    "description": "Traces the communication between VS Code and the language server."
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run esbuild-base -- --minify",
+        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+        "esbuild": "npm run esbuild-base -- --sourcemap",
+        "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+        "package": "vsce package",
+        "test-compile": "tsc -p ./",
+        "format": "prettier --write .",
+        "check-format": "prettier --check .",
+        "deploy": "vsce publish"
+    },
+    "dependencies": {
+        "vscode-languageclient": "^8.0.3",
+        "which": "^3.0.1"
+    },
+    "devDependencies": {
+        "@types/node": "^12.12.0",
+        "@types/vscode": "1.67.0",
+        "@types/which": "^3.0.0",
+        "@typescript-eslint/parser": "^5.59.9",
+        "esbuild": "^0.17.19",
+        "eslint": "^8.42.0",
+        "prettier": "^2.8.8",
+        "typescript": "^5.1.3",
+        "vsce": "^2.15.0"
     }
 }
