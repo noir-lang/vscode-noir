@@ -8,6 +8,7 @@
         "noir",
         "noir-lang"
     ],
+    "icon": "noir.png",
     "engines": {
         "vscode": "^1.67.0"
     },
