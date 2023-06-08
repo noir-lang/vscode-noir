@@ -36,7 +36,7 @@
         ],
         "snippets": [
             {
-                "language": "nr",
+                "language": "noir",
                 "path": "./snippets/snippets.json"
             }
         ],
