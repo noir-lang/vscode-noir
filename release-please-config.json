@@ -1,0 +1,13 @@
+{
+  "release-type": "simple",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "pull-request-title-pattern": "chore: Release ${version}",
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "component": "vscode-noir",
+      "include-component-in-tag": false
+    }
+  }
+}
