@@ -1,0 +1,13 @@
+.vscode/
+node_modules/
+out/*.js.map
+scripts/
+src/
+test/
+.gitignore
+.npmrc
+.prettierignore
+CHANGELOG.md
+package-lock.json
+tsconfig.json
+*.vsix
