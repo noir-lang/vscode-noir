@@ -1,6 +1,6 @@
 {
     "name": "vscode-noir",
-    "displayName": "Noir",
+    "displayName": "Noir Language Support",
     "description": "Noir support for Visual Studio Code",
     "version": "0.0.2",
     "publisher": "noir-lang",
