@@ -1,3 +1,4 @@
+.github/
 .vscode/
 node_modules/
 out/*.js.map
