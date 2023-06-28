@@ -169,7 +169,10 @@ function registerCommands(uri: Uri) {
         TaskScope.Workspace,
         displayName,
         languageId,
-        new ProcessExecution(nargoPath, [command].concat(nargoFlags).concat(args)),
+        new ProcessExecution(
+          nargoPath,
+          [command].concat(nargoFlags).concat(args)
+        ),
         []
       );
       task.group = group;
