@@ -27,6 +27,13 @@ import {
   ConfigurationChangeEvent,
   Uri,
   window,
+  tasks,
+  Task,
+  TaskScope,
+  TaskRevealKind,
+  TaskPanelKind,
+  TaskGroup,
+  ProcessExecution,
 } from "vscode";
 
 import {
@@ -43,6 +50,7 @@ let languageId = "noir";
 
 let outputChannel = window.createOutputChannel(extensionName, languageId);
 
+let activeCommands: Map<string, Disposable> = new Map();
 let fileClients: Map<string, LanguageClient> = new Map();
 let workspaceClients: Map<string, LanguageClient> = new Map();
 
@@ -137,6 +145,75 @@ function getLspCommand(uri: Uri) {
   let args = ["lsp", ...flags.split(" ")].filter((arg) => arg !== "");
 
   return [command, args] as const;
+}
+
+let INTERNAL_COMMANDS = [
+  { type: "nargo", command: "test", group: TaskGroup.Test },
+];
+
+function registerCommands(uri: Uri) {
+  let file = uri.toString();
+  let config = workspace.getConfiguration("noir", uri);
+
+  let nargoPath = config.get<string | undefined>("nargoPath") || findNargo();
+
+  let nargoFlags = config.get<string | undefined>("nargoFlags") || [];
+
+  let commands$: Disposable[] = [];
+  for (let { type, command, group } of INTERNAL_COMMANDS) {
+    let internalName = `${type}.${command}`;
+    let displayName = `${type} ${command}`;
+    let command$ = commands.registerCommand(internalName, async (args) => {
+      let task = new Task(
+        { type, command },
+        TaskScope.Workspace,
+        displayName,
+        languageId,
+        new ProcessExecution(
+          nargoPath,
+          [command].concat(nargoFlags).concat(args)
+        ),
+        []
+      );
+      task.group = group;
+      // We set `isBackground` to `true` to avoid showing the internal task as "recently used"
+      task.isBackground = true;
+      // However, we still want to show the terminal when you run a test
+      task.presentationOptions = {
+        reveal: TaskRevealKind.Always,
+        panel: TaskPanelKind.Dedicated,
+        clear: true,
+      };
+
+      return tasks.executeTask(task);
+    });
+
+    commands$.push(command$);
+  }
+
+  activeCommands.set(file, Disposable.from(...commands$));
+}
+
+function disposeCommands(uri: Uri) {
+  let file = uri.toString();
+  let commands$ = activeCommands.get(file);
+  commands$.dispose();
+}
+
+function registerFileCommands(uri: Uri) {
+  registerCommands(uri);
+}
+
+function disposeFileCommands(uri: Uri) {
+  disposeCommands(uri);
+}
+
+function registerWorkspaceCommands(workspaceFolder: WorkspaceFolder) {
+  registerCommands(workspaceFolder.uri);
+}
+
+function disposeWorkspaceCommands(workspaceFolder: WorkspaceFolder) {
+  disposeCommands(workspaceFolder.uri);
 }
 
 async function startFileClient(uri: Uri) {
@@ -272,18 +349,23 @@ async function didOpenTextDocument(
     folder = getOuterMostWorkspaceFolder(folder);
 
     await addWorkspaceClient(folder);
+    registerWorkspaceCommands(folder);
 
     configHandler = mutex(
       folder.uri.toString(),
       async (e: ConfigurationChangeEvent) => {
         if (e.affectsConfiguration("noir.nargoFlags", folder.uri)) {
+          disposeWorkspaceCommands(folder);
           await removeWorkspaceClient(folder);
           await addWorkspaceClient(folder);
+          registerWorkspaceCommands(folder);
         }
 
         if (e.affectsConfiguration("noir.nargoPath", folder.uri)) {
+          disposeWorkspaceCommands(folder);
           await removeWorkspaceClient(folder);
           await addWorkspaceClient(folder);
+          registerWorkspaceCommands(folder);
         }
 
         if (e.affectsConfiguration("noir.enableLSP", folder.uri)) {
@@ -301,18 +383,23 @@ async function didOpenTextDocument(
 
     // Each file outside of a workspace gets it's own client
     await addFileClient(uri);
+    registerFileCommands(uri);
 
     configHandler = mutex(
       uri.toString(),
       async (e: ConfigurationChangeEvent) => {
         if (e.affectsConfiguration("noir.nargoFlags", uri)) {
+          disposeFileCommands(uri);
           await removeFileClient(uri);
           await addFileClient(uri);
+          registerFileCommands(uri);
         }
 
         if (e.affectsConfiguration("noir.nargoPath", uri)) {
+          disposeFileCommands(uri);
           await removeFileClient(uri);
           await addFileClient(uri);
+          registerFileCommands(uri);
         }
 
         if (e.affectsConfiguration("noir.enableLSP", uri)) {

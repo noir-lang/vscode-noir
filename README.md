@@ -8,6 +8,7 @@ This extension helps developers write, understand, and improve Noir code by prov
 
 - Syntax highlighting
 - Compile errors and warnings on file save
+- Run tests via codelens above each test
 - Useful snippets for common code patterns
 
 ## Requirements
