@@ -24,7 +24,8 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onLanguage:noir"
+    "onLanguage:noir",
+    "onCommand:nargo.compile"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -32,8 +33,20 @@
       {
         "command": "noir.restart",
         "title": "Noir: Restart Language Server"
+      },
+      {
+        "command": "nargo.compile",
+        "title": "Nargo: Compile"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "nargo.compile",
+          "when": "editorLangId == noir || resourceFilename == 'Nargo.toml'"
+        }
+      ]
+    },
     "snippets": [
       {
         "language": "noir",
@@ -90,6 +103,10 @@
           ],
           "default": "off",
           "description": "Traces the communication between VS Code and the language server."
+        },
+        "noir.enableCodeLens": {
+          "type": "boolean",
+          "default": true
         }
       }
     }

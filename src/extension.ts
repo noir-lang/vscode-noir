@@ -34,6 +34,7 @@ import {
   TaskPanelKind,
   TaskGroup,
   ProcessExecution,
+  languages,
 } from "vscode";
 
 import {
@@ -43,6 +44,9 @@ import {
 } from "vscode-languageclient/node";
 
 import which from "which";
+
+import { nargoCompileCommand, NargoCompileCommandId } from "./NargoCommandProvider";
+import { NargoCodelensProvider } from "./NargoCodeLensProvider";
 
 let extensionName = "Noir Language Server";
 
@@ -444,6 +448,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
     const disposable = await didOpenTextDocument(doc);
     context.subscriptions.push(disposable);
   }
+
+  context.subscriptions.push(commands.registerCommand(NargoCompileCommandId, nargoCompileCommand));
+
+  languages.registerCodeLensProvider("noir", new NargoCodelensProvider());
 }
 
 export async function deactivate(): Promise<void> {
