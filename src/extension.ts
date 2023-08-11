@@ -163,7 +163,7 @@ function registerCommands(uri: Uri) {
   for (let { type, command, group } of INTERNAL_COMMANDS) {
     let internalName = `${type}.${command}`;
     let displayName = `${type} ${command}`;
-    let command$ = commands.registerCommand(internalName, async (args) => {
+    let command$ = commands.registerCommand(internalName, async (...args) => {
       let task = new Task(
         { type, command },
         TaskScope.Workspace,
