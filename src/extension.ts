@@ -149,6 +149,7 @@ function getLspCommand(uri: Uri) {
 
 let INTERNAL_COMMANDS = [
   { type: "nargo", command: "test", group: TaskGroup.Test },
+  { type: "nargo", command: "compile", group: TaskGroup.Build },
 ];
 
 function registerCommands(uri: Uri) {
@@ -181,7 +182,7 @@ function registerCommands(uri: Uri) {
       // However, we still want to show the terminal when you run a test
       task.presentationOptions = {
         reveal: TaskRevealKind.Always,
-        panel: TaskPanelKind.Dedicated,
+        panel: TaskPanelKind.New,
         clear: true,
       };
 
