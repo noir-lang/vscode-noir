@@ -81,11 +81,9 @@ export default class Client extends LanguageClient {
   }
 
   async start(): Promise<void> {
-    this.info(
-      `Starting LSP client using command: ${this.#command} ${this.#args.join(
-        " "
-      )}`
-    );
+    let command = this.#command;
+    let args = this.#args.join(" ");
+    this.info(`Starting LSP client using command: ${command} ${args}`);
 
     await super.start();
   }
