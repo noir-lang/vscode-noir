@@ -26,7 +26,6 @@ import {
   WorkspaceFoldersChangeEvent,
   ConfigurationChangeEvent,
   Uri,
-  window,
   tasks,
   Task,
   TaskScope,
@@ -36,23 +35,12 @@ import {
   ProcessExecution,
 } from "vscode";
 
-import {
-  LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
-} from "vscode-languageclient/node";
-
-import which from "which";
-
-let extensionName = "Noir Language Server";
-
-let languageId = "noir";
-
-let outputChannel = window.createOutputChannel(extensionName, languageId);
+import { languageId } from "./constants";
+import Client from "./client";
+import findNargo from "./find-nargo";
 
 let activeCommands: Map<string, Disposable> = new Map();
-let fileClients: Map<string, LanguageClient> = new Map();
-let workspaceClients: Map<string, LanguageClient> = new Map();
+let clients: Map<string, Client> = new Map();
 
 let activeMutex: Set<string> = new Set();
 
@@ -75,32 +63,12 @@ function mutex(key: string, fn: (...args: unknown[]) => Promise<void>) {
   };
 }
 
-const nargoBinaries = ["nargo"];
-
-function findNargo() {
-  for (const bin of nargoBinaries) {
-    try {
-      const nargo = which.sync(bin);
-      // If it didn't throw, we found a nargo binary
-      return nargo;
-    } catch (err) {
-      // Not found
-    }
-  }
-  throw new Error("Unable to locate any nargo binary. Did you install it?");
-}
-
 function dirpathFromUri(uri: Uri): string {
   let dirPath = uri.toString();
   if (!dirPath.endsWith("/")) {
     return dirPath + "/";
   }
   return dirPath;
-}
-
-function globFromUri(uri: Uri, glob: string) {
-  // globs always need to use `/`
-  return `${uri.fsPath}${glob}`.replaceAll("\\", "/");
 }
 
 let workspaceFolders: string[] = [];
@@ -126,25 +94,6 @@ function getOuterMostWorkspaceFolder(folder: WorkspaceFolder): WorkspaceFolder {
     }
   }
   return folder;
-}
-
-function getLspCommand(uri: Uri) {
-  let config = workspace.getConfiguration("noir", uri);
-
-  let lspEnabled = config.get<boolean>("enableLSP");
-
-  if (!lspEnabled) {
-    return;
-  }
-
-  let command = config.get<string | undefined>("nargoPath") || findNargo();
-
-  let flags = config.get<string | undefined>("nargoFlags") || "";
-
-  // Remove empty strings from the flags list
-  let args = ["lsp", ...flags.split(" ")].filter((arg) => arg !== "");
-
-  return [command, args] as const;
 }
 
 let INTERNAL_COMMANDS = [
@@ -218,119 +167,46 @@ function disposeWorkspaceCommands(workspaceFolder: WorkspaceFolder) {
   disposeCommands(workspaceFolder.uri);
 }
 
-async function startFileClient(uri: Uri) {
-  let [command, args] = getLspCommand(uri);
-
-  let clientOptions = {
-    documentSelector: [
-      {
-        scheme: uri.scheme,
-        language: languageId,
-        pattern: `${globFromUri(uri, "")}`,
-      },
-    ],
-    outputChannel,
-  };
-
-  let serverOptions: ServerOptions = {
-    command,
-    args,
-  };
-
-  let client = new LanguageClient(
-    languageId,
-    extensionName,
-    serverOptions,
-    clientOptions
-  );
-
-  client.info(
-    `Starting LSP client using command: ${command} ${args.join(" ")}`
-  );
-
-  await client.start();
-
-  return client;
-}
-
 async function addFileClient(uri: Uri) {
   let file = uri.toString();
-  if (!fileClients.has(file)) {
+  if (!clients.has(file)) {
     // Start the client. This will also launch the server
-    let client = await startFileClient(uri);
-    fileClients.set(file, client);
+    let client = new Client(uri);
+    clients.set(file, client);
+    await client.start();
   }
 }
 
 async function removeFileClient(uri: Uri) {
   let file = uri.toString();
-  let client = fileClients.get(file);
+  let client = clients.get(file);
   if (client) {
     await client.stop();
-    fileClients.delete(file);
+    clients.delete(file);
   }
-}
-
-async function startWorkspaceClient(workspaceFolder: WorkspaceFolder) {
-  let [command, args] = getLspCommand(workspaceFolder.uri);
-
-  let clientOptions: LanguageClientOptions = {
-    documentSelector: [
-      {
-        scheme: "file",
-        language: languageId,
-        // Glob starts with `/` because it just appends both segments
-        pattern: `${globFromUri(workspaceFolder.uri, "/**/*")}`,
-      },
-    ],
-    workspaceFolder,
-    outputChannel,
-  };
-
-  let serverOptions: ServerOptions = {
-    command,
-    args,
-  };
-
-  let client = new LanguageClient(
-    languageId,
-    extensionName,
-    serverOptions,
-    clientOptions
-  );
-
-  client.info(
-    `Starting LSP client using command: ${command} ${args.join(" ")}`
-  );
-
-  await client.start();
-
-  return client;
 }
 
 async function addWorkspaceClient(workspaceFolder: WorkspaceFolder) {
   let workspacePath = workspaceFolder.uri.toString();
-  if (!workspaceClients.has(workspacePath)) {
+  if (!clients.has(workspacePath)) {
     // Start the client. This will also launch the server
-    let client = await startWorkspaceClient(workspaceFolder);
-    workspaceClients.set(workspacePath, client);
+    let client = new Client(workspaceFolder.uri, workspaceFolder);
+    clients.set(workspacePath, client);
+    await client.start();
   }
 }
 
 async function removeWorkspaceClient(workspaceFolder: WorkspaceFolder) {
   let workspacePath = workspaceFolder.uri.toString();
-  let client = workspaceClients.get(workspacePath);
+  let client = clients.get(workspacePath);
   if (client) {
     await client.stop();
-    workspaceClients.delete(workspacePath);
+    clients.delete(workspacePath);
   }
 }
 
 async function restartAllClients() {
-  for (let client of fileClients.values()) {
-    await client.restart();
-  }
-  for (let client of workspaceClients.values()) {
+  for (let client of clients.values()) {
     await client.restart();
   }
 }
@@ -449,10 +325,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 }
 
 export async function deactivate(): Promise<void> {
-  for (let client of fileClients.values()) {
-    await client.stop();
-  }
-  for (let client of workspaceClients.values()) {
+  for (let client of clients.values()) {
     await client.stop();
   }
 }
