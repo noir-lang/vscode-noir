@@ -1,4 +1,16 @@
-import { workspace, WorkspaceFolder, Uri, window, OutputChannel } from "vscode";
+import {
+  workspace,
+  WorkspaceFolder,
+  Uri,
+  window,
+  tests,
+  TestRunProfileKind,
+  Range,
+  TestItem,
+  TestMessage,
+  TestController,
+  OutputChannel,
+} from "vscode";
 
 import {
   LanguageClient,
@@ -9,6 +21,23 @@ import {
 
 import { extensionName, languageId } from "./constants";
 import findNargo from "./find-nargo";
+
+type NargoTests = {
+  package: string;
+  uri: string;
+  tests?: {
+    id: string;
+    label: string;
+    uri: string;
+    range: Range;
+  }[];
+};
+
+type RunTestResult = {
+  id: string;
+  result: "pass" | "fail" | "error";
+  message: string;
+};
 
 function globFromUri(uri: Uri, glob: string) {
   // globs always need to use `/`
@@ -39,6 +68,11 @@ export default class Client extends LanguageClient {
   #command: string;
   #args: string[];
   #output: OutputChannel;
+
+  // This function wasn't added until vscode 1.81.0 so fake the type
+  #testController: TestController & {
+    invalidateTestResults?: (item: TestItem) => void;
+  };
 
   constructor(uri: Uri, workspaceFolder?: WorkspaceFolder) {
     let outputChannel = window.createOutputChannel(extensionName, languageId);
@@ -78,6 +112,120 @@ export default class Client extends LanguageClient {
     this.#command = command;
     this.#args = args;
     this.#output = outputChannel;
+
+    // TODO: Figure out how to do type-safe onNotification
+    this.onNotification("nargo/tests/update", (testData: NargoTests) => {
+      this.#updateTests(testData);
+    });
+
+    this.#testController = tests.createTestController(
+      // We prefix with our ID namespace but we also tie these to the URI since they need to be unique
+      `NoirWorkspaceTests-${uri.toString()}`,
+      "Noir Workspace Tests"
+    );
+
+    this.#testController.resolveHandler = async (test) => {
+      const response = await this.sendRequest<NargoTests[]>("nargo/tests", {});
+      // TODO: reload a single test
+      response.forEach((testData) => {
+        this.#createTests(testData);
+      });
+    };
+    this.#testController.refreshHandler = async (token) => {
+      const response = await this.sendRequest<NargoTests[]>(
+        "nargo/tests",
+        {},
+        token
+      );
+      response.forEach((testData) => {
+        this.#updateTests(testData);
+      });
+    };
+
+    this.#testController.createRunProfile(
+      "Run Tests",
+      TestRunProfileKind.Run,
+      async (request, token) => {
+        const run = this.#testController.createTestRun(request);
+        const queue: TestItem[] = [];
+
+        // Loop through all included tests, or all known tests, and add them to our queue
+        if (request.include) {
+          request.include.forEach((test) => queue.push(test));
+        } else {
+          this.#testController.items.forEach((test) => queue.push(test));
+        }
+
+        while (queue.length > 0 && !token.isCancellationRequested) {
+          const test = queue.pop()!;
+
+          // Skip tests the user asked to exclude
+          if (request.exclude?.includes(test)) {
+            continue;
+          }
+
+          // We don't run our test headers since they are just for grouping
+          // but this is fine because the test pass/fail icons are propagated upward
+          if (test.parent) {
+            const { id, result, message } =
+              await this.sendRequest<RunTestResult>(
+                "nargo/tests/run",
+                {
+                  id: test.id,
+                },
+                token
+              );
+
+            // TODO: Handle `test.id !== id`. I'm not sure if it is possible for this to happen in normal usage
+
+            if (result === "pass") {
+              run.passed(test);
+              continue;
+            }
+
+            if (result === "fail" || result === "error") {
+              run.failed(test, new TestMessage(message));
+              continue;
+            }
+          }
+
+          // After tests are run (if any), we add any children to the queue
+          test.children.forEach((test) => queue.push(test));
+        }
+
+        run.end();
+      },
+      true
+    );
+  }
+
+  #createTests(testData: NargoTests) {
+    let pkg = this.#testController.createTestItem(
+      testData.package,
+      testData.package
+    );
+
+    testData.tests.forEach((test) => {
+      let item = this.#testController.createTestItem(
+        test.id,
+        test.label,
+        Uri.parse(test.uri)
+      );
+      item.range = test.range;
+      pkg.children.add(item);
+    });
+
+    this.#testController.items.add(pkg);
+  }
+
+  #updateTests(testData: NargoTests) {
+    // This function wasn't added until vscode 1.81.0 so we check for it
+    if (typeof this.#testController.invalidateTestResults === "function") {
+      let pkg = this.#testController.items.get(testData.package);
+      this.#testController.invalidateTestResults(pkg);
+    }
+
+    this.#createTests(testData);
   }
 
   async start(): Promise<void> {
@@ -89,6 +237,7 @@ export default class Client extends LanguageClient {
   }
 
   async dispose(timeout?: number): Promise<void> {
+    await this.#testController.dispose();
     await super.dispose(timeout);
   }
 }
