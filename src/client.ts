@@ -10,17 +10,30 @@ import {
   TestMessage,
   TestController,
   OutputChannel,
+  CancellationToken,
+  TestRunRequest,
 } from "vscode";
 
 import {
   LanguageClient,
   LanguageClientOptions,
+  ServerCapabilities,
   ServerOptions,
   TextDocumentFilter,
 } from "vscode-languageclient/node";
 
 import { extensionName, languageId } from "./constants";
 import findNargo from "./find-nargo";
+
+type NargoCapabilities = {
+  nargo?: {
+    tests?: {
+      fetch: boolean;
+      run: boolean;
+      update: boolean;
+    };
+  };
+};
 
 type NargoTests = {
   package: string;
@@ -118,85 +131,118 @@ export default class Client extends LanguageClient {
       this.#updateTests(testData);
     });
 
-    this.#testController = tests.createTestController(
-      // We prefix with our ID namespace but we also tie these to the URI since they need to be unique
-      `NoirWorkspaceTests-${uri.toString()}`,
-      "Noir Workspace Tests"
-    );
+    this.registerFeature({
+      fillClientCapabilities: () => {},
+      initialize: (capabilities: ServerCapabilities & NargoCapabilities) => {
+        outputChannel.appendLine(`${JSON.stringify(capabilities)}`);
+        if (typeof capabilities.nargo?.tests !== "undefined") {
+          this.#testController = tests.createTestController(
+            // We prefix with our ID namespace but we also tie these to the URI since they need to be unique
+            `NoirWorkspaceTests-${uri.toString()}`,
+            "Noir Workspace Tests"
+          );
 
-    this.#testController.resolveHandler = async (test) => {
-      const response = await this.sendRequest<NargoTests[]>("nargo/tests", {});
-      // TODO: reload a single test
-      response.forEach((testData) => {
-        this.#createTests(testData);
-      });
-    };
-    this.#testController.refreshHandler = async (token) => {
-      const response = await this.sendRequest<NargoTests[]>(
-        "nargo/tests",
-        {},
-        token
-      );
-      response.forEach((testData) => {
-        this.#updateTests(testData);
-      });
-    };
-
-    this.#testController.createRunProfile(
-      "Run Tests",
-      TestRunProfileKind.Run,
-      async (request, token) => {
-        const run = this.#testController.createTestRun(request);
-        const queue: TestItem[] = [];
-
-        // Loop through all included tests, or all known tests, and add them to our queue
-        if (request.include) {
-          request.include.forEach((test) => queue.push(test));
-        } else {
-          this.#testController.items.forEach((test) => queue.push(test));
-        }
-
-        while (queue.length > 0 && !token.isCancellationRequested) {
-          const test = queue.pop()!;
-
-          // Skip tests the user asked to exclude
-          if (request.exclude?.includes(test)) {
-            continue;
+          if (capabilities.nargo.tests.fetch) {
+            // TODO: reload a single test if provided as the function argument
+            this.#testController.resolveHandler = async (test) => {
+              await this.#fetchTests();
+            };
+            this.#testController.refreshHandler = async (token) => {
+              await this.#refreshTests(token);
+            };
           }
 
-          // We don't run our test headers since they are just for grouping
-          // but this is fine because the test pass/fail icons are propagated upward
-          if (test.parent) {
-            const { id, result, message } =
-              await this.sendRequest<RunTestResult>(
-                "nargo/tests/run",
-                {
-                  id: test.id,
-                },
-                token
-              );
-
-            // TODO: Handle `test.id !== id`. I'm not sure if it is possible for this to happen in normal usage
-
-            if (result === "pass") {
-              run.passed(test);
-              continue;
-            }
-
-            if (result === "fail" || result === "error") {
-              run.failed(test, new TestMessage(message));
-              continue;
-            }
+          if (capabilities.nargo.tests.run) {
+            this.#testController.createRunProfile(
+              "Run Tests",
+              TestRunProfileKind.Run,
+              async (request, token) => {
+                await this.#runTest(request, token);
+              },
+              true
+            );
           }
-
-          // After tests are run (if any), we add any children to the queue
-          test.children.forEach((test) => queue.push(test));
         }
-
-        run.end();
       },
-      true
+      getState: () => {
+        return { kind: "static" };
+      },
+      dispose: () => {
+        if (this.#testController) {
+          this.#testController.dispose();
+        }
+      },
+    });
+  }
+
+  async #fetchTests() {
+    const response = await this.sendRequest<NargoTests[]>("nargo/tests", {});
+
+    response.forEach((testData) => {
+      this.#createTests(testData);
+    });
+  }
+
+  async #refreshTests(token: CancellationToken) {
+    const response = await this.sendRequest<NargoTests[]>(
+      "nargo/tests",
+      {},
+      token
     );
+    response.forEach((testData) => {
+      this.#updateTests(testData);
+    });
+  }
+
+  async #runTest(request: TestRunRequest, token: CancellationToken) {
+    const run = this.#testController.createTestRun(request);
+    const queue: TestItem[] = [];
+
+    // Loop through all included tests, or all known tests, and add them to our queue
+    if (request.include) {
+      request.include.forEach((test) => queue.push(test));
+    } else {
+      this.#testController.items.forEach((test) => queue.push(test));
+    }
+
+    while (queue.length > 0 && !token.isCancellationRequested) {
+      const test = queue.pop()!;
+
+      // Skip tests the user asked to exclude
+      if (request.exclude?.includes(test)) {
+        continue;
+      }
+
+      // We don't run our test headers since they are just for grouping
+      // but this is fine because the test pass/fail icons are propagated upward
+      if (test.parent) {
+        // If we have these tests, the server will be able to run them with this message
+        const { id, result, message } = await this.sendRequest<RunTestResult>(
+          "nargo/tests/run",
+          {
+            id: test.id,
+          },
+          token
+        );
+
+        // TODO: Handle `test.id !== id`. I'm not sure if it is possible for this to happen in normal usage
+
+        if (result === "pass") {
+          run.passed(test);
+          continue;
+        }
+
+        if (result === "fail" || result === "error") {
+          run.failed(test, new TestMessage(message));
+          continue;
+        }
+      }
+
+      // After tests are run (if any), we add any children to the queue
+      test.children.forEach((test) => queue.push(test));
+    }
+
+    run.end();
   }
 
   #createTests(testData: NargoTests) {
@@ -237,7 +283,6 @@ export default class Client extends LanguageClient {
   }
 
   async dispose(timeout?: number): Promise<void> {
-    await this.#testController.dispose();
     await super.dispose(timeout);
   }
 }
