@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5](https://github.com/noir-lang/vscode-noir/compare/v0.0.4...v0.0.5) (2023-09-15)
+
+
+### Features
+
+* Implement Testing Panel via custom LSP messages ([#39](https://github.com/noir-lang/vscode-noir/issues/39)) ([890b606](https://github.com/noir-lang/vscode-noir/commit/890b606a36127297aeb8a961bee20a4757cfb531))
+
 ## [0.0.4](https://github.com/noir-lang/vscode-noir/compare/v0.0.3...v0.0.4) (2023-08-16)
 
 
