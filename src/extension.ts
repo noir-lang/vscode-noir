@@ -36,7 +36,7 @@ import {
 } from "vscode";
 
 import { languageId } from "./constants";
-import Client from "./client";
+import Client from "./client/wasm-client";
 import findNargo from "./find-nargo";
 
 let activeCommands: Map<string, Disposable> = new Map();

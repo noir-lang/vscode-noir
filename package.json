@@ -96,7 +96,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --loader:.wasm=binary",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "package": "vsce package",
@@ -105,7 +105,11 @@
     "check-format": "prettier --check .",
     "deploy": "vsce publish"
   },
+  "extensionDependencies": [
+    "ms-vscode.wasm-wasi-core"
+  ],
   "dependencies": {
+    "@vscode/wasm-wasi": "0.13.0-pre.1",
     "vscode-languageclient": "^8.0.3",
     "which": "^3.0.1"
   },
