@@ -27,6 +27,7 @@
     "onLanguage:noir"
   ],
   "main": "./out/extension",
+  "browser": "./out/extension.js",
   "contributes": {
     "commands": [
       {
@@ -96,7 +97,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --loader:.wasm=binary",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=browser --loader:.wasm=binary",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "package": "vsce package",
