@@ -13,3 +13,4 @@ package-lock.json
 tsconfig.json
 *.vsix
 *.nr
+.vscode-test-web/
