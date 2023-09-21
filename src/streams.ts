@@ -20,7 +20,20 @@ export class WasmMessageReader extends ReadableStreamMessageReader {
   constructor(reader: Readable) {
     super({
       get onData() {
-        return reader.onData;
+        return (listener: (data: Uint8Array) => void) => {
+          // Sometimes (such as inside vscode.dev) the `data` is actually a SharedArrayBuffer, which can't be decoded
+          // Instead, it needs to be copied and then decoded. Conversion code from https://stackoverflow.com/a/76916494
+          return reader.onData((data) => {
+            // Create a temporary ArrayBuffer and copy the contents of the shared buffer into it.
+            const tempBuffer = new ArrayBuffer(data.byteLength);
+            const tempView = new Uint8Array(tempBuffer);
+
+            let sharedView = new Uint8Array(data);
+            sharedView = sharedView.subarray(0, data.byteLength);
+            tempView.set(sharedView);
+            listener(sharedView);
+          });
+        };
       },
       onClose(listener: () => void): Disposable {
         return Disposable.create(() => {});
