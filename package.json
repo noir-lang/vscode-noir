@@ -105,7 +105,7 @@
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "deploy": "vsce publish",
-    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=./ --browser=none --coi"
+    "open-in-browser": "vscode-test-web --extensionPath=./ --extensionId=ms-vscode.wasm-wasi-core@prerelease --browser=none --coi"
   },
   "extensionDependencies": [
     "ms-vscode.wasm-wasi-core"
