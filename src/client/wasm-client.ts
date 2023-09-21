@@ -303,11 +303,14 @@ export default class WasmClient extends BaseLanguageClient {
     );
 
     testData.tests.forEach((test) => {
-      let item = this.#testController.createTestItem(
-        test.id,
-        test.label,
-        Uri.parse(test.uri)
-      );
+      // This normalizes the URI scheme and authority based on our workspace root, which is a workaround for the
+      // custom `nargo` LSP messages not knowing about alternative, non-file schemes (such as `vscode-test-web://`)
+      // TODO: Properly normalize the URIs inside of the LSP itself
+      let uri = Uri.parse(test.uri).with({
+        scheme: this.#uri.scheme,
+        authority: this.#uri.authority,
+      });
+      let item = this.#testController.createTestItem(test.id, test.label, uri);
       item.range = test.range;
       pkg.children.add(item);
     });
