@@ -185,24 +185,33 @@ export default class WasmClient extends BaseLanguageClient {
         rootFileSystem,
       });
 
-      // TODO: Need to handle stderr somehow
-      // process.stderr.onData((err) => {
-      //   outputChannel.appendLine(`err: ${new TextDecoder().decode(err)}`);
-      // });
+      // TODO: Need to handle stderr better
+      this.#process.stderr.onData((err) => {
+        this.outputChannel.appendLine(`err: ${err}`);
+      });
 
       const result = this.#process.run();
       this.outputChannel.appendLine(`Process started`);
-      result.then((exitCode) => {
-        this.outputChannel.appendLine(`Process exited with code: ${exitCode}`);
-      });
+      result
+        .then((exitCode) => {
+          this.outputChannel.appendLine(
+            `Process exited with code: ${exitCode}`
+          );
+        })
+        .catch((err) => {
+          this.outputChannel.appendLine(`Process exited with error: ${err}`);
+        })
+        .finally(() => {
+          this.outputChannel.appendLine(`Process exited!`);
+        });
 
       return {
         writer: new WasmMessageWriter(this.#process.stdin),
         reader: new WasmMessageReader(this.#process.stdout),
       };
     } catch (error) {
-      // TODO: Handle this error
-      // await window.showErrorMessage(error.message);
+      // TODO: Bubble this error
+      this.outputChannel.appendLine(`err: ${error.message}`);
     }
   }
 
