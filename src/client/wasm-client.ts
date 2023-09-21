@@ -24,7 +24,7 @@ import { extensionName, languageId } from "../constants";
 import { WasmMessageReader, WasmMessageWriter } from "../streams";
 
 //@ts-ignore
-import noirLspWasm from "./noir_lsp.wasm";
+import noirLspWasm from "./noir_lsp_wasm.wasm";
 
 type NargoCapabilities = {
   nargo?: {
