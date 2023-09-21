@@ -72,18 +72,32 @@ export default class WasmClient extends BaseLanguageClient {
 
     let documentSelector: TextDocumentFilter[] = [];
     if (workspaceFolder) {
-      documentSelector.push({
-        scheme: "file",
-        language: languageId,
-        // Glob starts with `/` because it just appends both segments
-        pattern: `${globFromUri(uri, "/**/*")}`,
-      });
+      documentSelector.push(
+        {
+          scheme: "file",
+          language: languageId,
+          // Glob starts with `/` because it just appends both segments
+          pattern: `${globFromUri(uri, "/**/*")}`,
+        },
+        // TODO: Need to figure out the scheme provided by vscode.dev and add it as another selector
+        {
+          scheme: "vscode-test-web",
+          language: languageId,
+        }
+      );
     } else {
-      documentSelector.push({
-        scheme: uri.scheme,
-        language: languageId,
-        pattern: `${globFromUri(uri, "")}`,
-      });
+      documentSelector.push(
+        {
+          scheme: uri.scheme,
+          language: languageId,
+          pattern: `${globFromUri(uri, "")}`,
+        },
+        // TODO: Need to figure out the scheme provided by vscode.dev and add it as another selector
+        {
+          scheme: "vscode-test-web",
+          language: languageId,
+        }
+      );
     }
 
     let clientOptions: LanguageClientOptions = {
