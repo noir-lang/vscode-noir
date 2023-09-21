@@ -36,8 +36,7 @@ import {
 } from "vscode";
 
 import { languageId } from "./constants";
-import Client from "./client";
-import findNargo from "./find-nargo";
+import Client from "./client/wasm-client";
 
 let activeCommands: Map<string, Disposable> = new Map();
 let clients: Map<string, Client> = new Map();
@@ -106,7 +105,7 @@ function registerCommands(uri: Uri) {
   let file = uri.toString();
   let config = workspace.getConfiguration("noir", uri);
 
-  let nargoPath = config.get<string | undefined>("nargoPath") || findNargo();
+  let nargoPath = config.get<string | undefined>("nargoPath");
 
   let nargoFlags = config.get<string | undefined>("nargoFlags") || [];
 
