@@ -99,6 +99,7 @@ function getOuterMostWorkspaceFolder(folder: WorkspaceFolder): WorkspaceFolder {
 let INTERNAL_COMMANDS = [
   { type: "nargo", command: "test", group: TaskGroup.Test },
   { type: "nargo", command: "compile", group: TaskGroup.Build },
+  { type: "nargo", command: "info", group: TaskGroup.Build },
   { type: "nargo", command: "execute", group: TaskGroup.Build },
 ];
 
