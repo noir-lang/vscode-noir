@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6](https://github.com/noir-lang/vscode-noir/compare/v0.0.5...v0.0.6) (2023-10-05)
+
+
+### Features
+
+* add support for "info" codelens to call `nargo info` ([#42](https://github.com/noir-lang/vscode-noir/issues/42)) ([6e5746b](https://github.com/noir-lang/vscode-noir/commit/6e5746b0894f88b74bba0e5ece9f7bd68b0487b2))
+
 ## [0.0.5](https://github.com/noir-lang/vscode-noir/compare/v0.0.4...v0.0.5) (2023-09-15)
 
 
