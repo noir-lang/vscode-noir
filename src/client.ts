@@ -20,7 +20,6 @@ import {
   ServerCapabilities,
   ServerOptions,
   TextDocumentFilter,
-
 } from "vscode-languageclient/node";
 
 import { extensionName, languageId } from "./constants";
@@ -201,7 +200,10 @@ export default class Client extends LanguageClient {
   }
 
   async refreshProfileInfo() {
-    const response = await this.sendRequest<NargoProfileRunResult>("nargo/profile/run", { package: ""});
+    const response = await this.sendRequest<NargoProfileRunResult>(
+      "nargo/profile/run",
+      { package: "" }
+    );
 
     this.profileRunResult = response;
   }
