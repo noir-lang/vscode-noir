@@ -17,9 +17,11 @@ import {
 import {
   LanguageClient,
   LanguageClientOptions,
+  LinkedMap,
   ServerCapabilities,
   ServerOptions,
   TextDocumentFilter,
+  integer,
 } from "vscode-languageclient/node";
 
 import { extensionName, languageId } from "./constants";
@@ -45,6 +47,8 @@ type NargoTests = {
     range: Range;
   }[];
 };
+
+type NargoProfileRunResult = any;
 
 type RunTestResult = {
   id: string;
@@ -81,7 +85,7 @@ export default class Client extends LanguageClient {
   #command: string;
   #args: string[];
   #output: OutputChannel;
-
+  profileRunResult: NargoProfileRunResult;
   // This function wasn't added until vscode 1.81.0 so fake the type
   #testController: TestController & {
     invalidateTestResults?: (item: TestItem) => void;
@@ -173,6 +177,12 @@ export default class Client extends LanguageClient {
         }
       },
     });
+  }
+
+  async refreshProfileInfo() {
+    const response = await this.sendRequest<NargoProfileRunResult>("nargo/profile/run", { package: ""});
+
+    this.profileRunResult = response;
   }
 
   async #fetchTests() {

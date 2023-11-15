@@ -33,14 +33,17 @@ import {
   TaskPanelKind,
   TaskGroup,
   ProcessExecution,
+  window,
+  ProgressLocation,
 } from "vscode";
 
 import { languageId } from "./constants";
 import Client from "./client";
 import findNargo from "./find-nargo";
+import { lspClients, editorLineDecorationManager } from "./noir";
 
 let activeCommands: Map<string, Disposable> = new Map();
-let clients: Map<string, Client> = new Map();
+
 
 let activeMutex: Set<string> = new Set();
 
@@ -143,6 +146,42 @@ function registerCommands(uri: Uri) {
     commands$.push(command$);
   }
 
+  
+  let profileCommand$ = commands.registerCommand(
+    "nargo.profile",
+    async (...args) => {  
+
+      window.withProgress({
+        location: ProgressLocation.Window,
+        cancellable: false,
+        title: 'Getting Profile Information'
+    }, async (progress) => {
+        
+        progress.report({  increment: 0 });
+    
+        let workspaceFolder = workspace.getWorkspaceFolder(uri).uri.toString();
+        const activeClient = lspClients.get(workspaceFolder);
+  
+        await activeClient.refreshProfileInfo();
+        editorLineDecorationManager.displayAllTextDecorations();
+      
+        progress.report({ increment: 100 });
+    });
+
+    }
+  );
+  commands$.push(profileCommand$);
+  let hideProfileInformationCommand$ = commands.registerCommand(
+    "noir.profile.hide",
+    async (...args) => {  
+
+      editorLineDecorationManager.hideDecorations();
+
+    }
+  );
+  commands$.push(hideProfileInformationCommand$);
+
+
   activeCommands.set(file, Disposable.from(...commands$));
 }
 
@@ -170,44 +209,44 @@ function disposeWorkspaceCommands(workspaceFolder: WorkspaceFolder) {
 
 async function addFileClient(uri: Uri) {
   let file = uri.toString();
-  if (!clients.has(file)) {
+  if (!lspClients.has(file)) {
     // Start the client. This will also launch the server
     let client = new Client(uri);
-    clients.set(file, client);
+    lspClients.set(file, client);
     await client.start();
   }
 }
 
 async function removeFileClient(uri: Uri) {
   let file = uri.toString();
-  let client = clients.get(file);
+  let client = lspClients.get(file);
   if (client) {
     await client.stop();
-    clients.delete(file);
+    lspClients.delete(file);
   }
 }
 
 async function addWorkspaceClient(workspaceFolder: WorkspaceFolder) {
   let workspacePath = workspaceFolder.uri.toString();
-  if (!clients.has(workspacePath)) {
+  if (!lspClients.has(workspacePath)) {
     // Start the client. This will also launch the server
     let client = new Client(workspaceFolder.uri, workspaceFolder);
-    clients.set(workspacePath, client);
+    lspClients.set(workspacePath, client);
     await client.start();
   }
 }
 
 async function removeWorkspaceClient(workspaceFolder: WorkspaceFolder) {
   let workspacePath = workspaceFolder.uri.toString();
-  let client = clients.get(workspacePath);
+  let client = lspClients.get(workspacePath);
   if (client) {
     await client.stop();
-    clients.delete(workspacePath);
+    lspClients.delete(workspacePath);
   }
 }
 
 async function restartAllClients() {
-  for (let client of clients.values()) {
+  for (let client of lspClients.values()) {
     await client.restart();
   }
 }
@@ -326,7 +365,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 }
 
 export async function deactivate(): Promise<void> {
-  for (let client of clients.values()) {
+  for (let client of lspClients.values()) {
     await client.stop();
   }
 }
