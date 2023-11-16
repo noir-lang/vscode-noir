@@ -34,7 +34,7 @@
         "title": "Noir: Restart Language Server"
       },
       {
-        "command": "noir.profile.hide",
+        "command": "nargo.profile.hide",
         "title": "Noir: Hide Profile information"
       }
     ],

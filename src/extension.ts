@@ -172,7 +172,7 @@ function registerCommands(uri: Uri) {
   );
   commands$.push(profileCommand$);
   let hideProfileInformationCommand$ = commands.registerCommand(
-    "noir.profile.hide",
+    "nargo.profile.hide",
     async (...args) => {  
 
       editorLineDecorationManager.hideDecorations();
