@@ -8,6 +8,7 @@ import {
   DecorationRangeBehavior,
   Position,
   ThemeColor,
+  commands,
 } from "vscode";
 import Client from "./client";
 
@@ -91,6 +92,9 @@ export class EditorLineDecorationManager extends Disposable {
     );
 
     updateDecorations(document, lineAccumulatedOpcodes);
+    
+    // Used to show Hide Commands in Pallette
+    commands.executeCommand('setContext', 'noir.profileInfoPresent', true);
   }
 
   hideDecorations() {
@@ -111,7 +115,7 @@ function updateDecorations(document, lineAccumulatedOpcodes: object) {
       decorators.push(lineDecorators);
 
       let hoverDecorators = lineInfo.ranges.map(({ range, countInfo }) => {
-        const hoverMessage = `// ${
+        const hoverMessage = `${
           countInfo.acir_size ? `${countInfo.acir_size} ACIR` : ""
         } ${
           countInfo.brillig_size ? `${countInfo.brillig_size} Brillig` : ""

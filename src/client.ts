@@ -17,11 +17,10 @@ import {
 import {
   LanguageClient,
   LanguageClientOptions,
-  LinkedMap,
   ServerCapabilities,
   ServerOptions,
   TextDocumentFilter,
-  integer,
+
 } from "vscode-languageclient/node";
 
 import { extensionName, languageId } from "./constants";

@@ -35,9 +35,18 @@
       },
       {
         "command": "nargo.profile.hide",
-        "title": "Noir: Hide Profile information"
+        "title": "Noir: Hide Profile information",
+        "when": "noir.profileInfoPresent == true"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "nargo.profile.hide",
+          "when": "noir.profileInfoPresent == true"
+        }
+      ]
+    },    
     "snippets": [
       {
         "language": "noir",
@@ -64,6 +73,17 @@
         "path": "./syntaxes/noir.tmLanguage.json"
       }
     ],
+    "keybindings": [{
+      "command": "nargo.profile.hide",
+      "key": "shift+alt+cmd+n, shift+p",
+      "mac": "shift+alt+cmd+n shift+p",
+      "when": "noir.profileInfoPresent"
+    },
+    {
+      "command": "nargo.profile",
+      "key": "shift+alt+cmd+n p",
+      "mac": "shift+alt+cmd+n p"
+    }],    
     "configuration": {
       "type": "object",
       "title": "Noir Language Server configuration",
