@@ -42,22 +42,26 @@ export class EditorLineDecorationManager extends Disposable {
     let workspaceFolder = workspace
       .getWorkspaceFolder(document.uri)
       .uri.toString();
+    
     const activeClient = this.lspClients.get(workspaceFolder);
 
+    // find file which we want to present hints for
     let [fileIdKey, _] = (
       Object.entries(activeClient.profileRunResult.file_map) as [string, any]
     ).find(([fileId, fileElement]) => {
       return fileElement.path === document.uri.path;
-    });
+    }) as [Number, any];
 
-    let fileId = Number(fileIdKey);
+    const fileId = Number(fileIdKey);
 
+    // Filter counts for file of interest
     const filteredResults = activeClient.profileRunResult.opcodes_counts.filter(
       ([spanInfo, _]) => {
         return spanInfo.file === fileId;
       }
     );
 
+    // Sum Opcodes for lines
     const lineAccumulatedOpcodes = filteredResults
       .map(([spanInfo, countInfo]) => {
         const startPosition = document.positionAt(spanInfo.span.start);
@@ -78,25 +82,27 @@ export class EditorLineDecorationManager extends Disposable {
         return accumulator;
       }, {});
 
+      // Count opcodes per line in accumulated collection
     (Object.entries(lineAccumulatedOpcodes) as [number, any]).forEach(
       ([lineNumber, lineInfo]) => {
         lineInfo.lineOpcodes = lineInfo.ranges.reduce(
-          ({ acir, brillig }, { range, countInfo }) => {
-            acir = acir + countInfo.acir_size;
-            brillig = brillig + countInfo.brillig_size;
-            return { acir, brillig };
+          ({ acir_size, brillig_size }, { range, countInfo }) => {
+            acir_size = acir_size + countInfo.acir_size;
+            brillig_size = brillig_size + countInfo.brillig_size;
+            return { acir_size, brillig_size };
           },
-          { acir: 0, brillig: 0 }
+          { acir_size: 0, brillig_size: 0 }
         );
       }
     );
 
     updateDecorations(document, lineAccumulatedOpcodes);
     
-    // Used to show Hide Commands in Pallette
+    // Used to show Hide Commands in Command Pallette
     commands.executeCommand('setContext', 'noir.profileInfoPresent', true);
   }
 
+  // Remove all decorations including onHover ones
   hideDecorations() {
     window.activeTextEditor.setDecorations(decoration, []);
   }
@@ -133,10 +139,11 @@ function updateDecorations(document, lineAccumulatedOpcodes: object) {
 
   window.activeTextEditor.setDecorations(decoration, decorations);
 }
+
 function lineDecorator(document: any, lineNumber: string, lineInfo: any) {
   const range: Range = document.lineAt(Number(lineNumber)).range;
   const lineContent = `// ${
-    lineInfo.lineOpcodes.acir ? `${lineInfo.lineOpcodes.acir} ACIR` : ""
+    lineInfo.lineOpcodes.acir_size ? `${lineInfo.lineOpcodes.acir_size} ACIR` : ""
   } ${lineInfo.brillig_size ? `${lineInfo.brillig_size} ACIR` : ""} opcodes`;
   const decorator = {
     range,
