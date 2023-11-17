@@ -75,13 +75,13 @@
     ],
     "keybindings": [{
       "command": "nargo.profile.hide",
-      "key": "shift+alt+cmd+n, shift+p",
+      "key": "shift+alt+ctrl+n, shift+p",
       "mac": "shift+alt+cmd+n shift+p",
       "when": "noir.profileInfoPresent"
     },
     {
       "command": "nargo.profile",
-      "key": "shift+alt+cmd+n p",
+      "key": "shift+alt+ctrl+n p",
       "mac": "shift+alt+cmd+n p"
     }],    
     "configuration": {
