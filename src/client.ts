@@ -47,7 +47,29 @@ type NargoTests = {
   }[];
 };
 
-type NargoProfileRunResult = any;
+type FileId = number;
+type FileInfo = {
+  path: string;
+  source: string;
+};
+
+type Span = {
+  start: number;
+  end: number;
+};
+type SpanInFile = {
+  file: FileId;
+  span: Span;
+};
+type OpcodesCounts = {
+  acir_size: number;
+  brillig_size: number;
+};
+
+type NargoProfileRunResult = {
+  file_map: Map<FileId, FileInfo>;
+  opcodes_counts: [[SpanInFile, OpcodesCounts]];
+};
 
 type RunTestResult = {
   id: string;
