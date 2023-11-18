@@ -72,7 +72,15 @@
         },
         {
           "name": "constant.numeric.nr",
+          "match": "(\\-)?0x[0-9a-fA-F]+"
+        },
+        {
+          "name": "constant.numeric.nr",
           "match": "(\\-)?\\d+(\\.\\d+)?"
+        },
+        {
+          "name": "constant.language.nr",
+          "match": "\\b(true|false)\\b"
         }
       ]
     },
@@ -119,12 +127,15 @@
           }
         },
         {
-          "match": "\\b(let)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "match": "\\b(let)\\s+(mut\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)",
           "captures": {
             "1": {
               "name": "keyword.nr"
             },
             "2": {
+              "name": "keyword.nr"
+            },
+            "3": {
               "name": "variable.nr"
             }
           }
@@ -218,11 +229,11 @@
       "patterns": [
         {
           "name": "keyword.control.nr",
-          "match": "\\b(fn|mod|use|struct|if|else|for|constrain)\\b"
+          "match": "\\b(fn|impl|trait|type|mod|use|struct|if|else|for|constrain)\\b"
         },
         {
           "name": "keyword.nr",
-          "match": "\\b(global|comptime|pub|in|as|let|true|false)\\b"
+          "match": "\\b(global|comptime|unconstrained|distinct|pub|&mut|mut|self|in|as|let)\\b"
         }
       ]
     },
@@ -230,7 +241,7 @@
       "patterns": [
         {
           "name": "support.type.nr",
-          "match": "\\b((u|i)\\d+|str|bool|Field|Witness)\\b"
+          "match": "\\b((u|i)\\d+|str|bool|Field)\\b"
         },
         {
           "name": "support.type.nr",
