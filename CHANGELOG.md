@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.7](https://github.com/noir-lang/vscode-noir/compare/v0.0.6...v0.0.7) (2023-11-18)
+
+
+### Features
+
+* Update language grammar ([#46](https://github.com/noir-lang/vscode-noir/issues/46)) ([85d3d4d](https://github.com/noir-lang/vscode-noir/commit/85d3d4d1570680b81170ec332695354870e43c17))
+
 ## [0.0.6](https://github.com/noir-lang/vscode-noir/compare/v0.0.5...v0.0.6) (2023-10-05)
 
 
