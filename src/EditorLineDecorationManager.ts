@@ -10,7 +10,7 @@ import {
   ThemeColor,
   commands,
 } from "vscode";
-import Client from "./client";
+import Client, { FileInfo, OpcodesCounts } from "./client";
 
 const decoration: TextEditorDecorationType =
   window.createTextEditorDecorationType({
@@ -47,10 +47,10 @@ export class EditorLineDecorationManager extends Disposable {
 
     // find file which we want to present hints for
     let [fileIdKey, _] = (
-      Object.entries(activeClient.profileRunResult.file_map) as [string, any]
+      Object.entries(activeClient.profileRunResult.file_map)
     ).find(([fileId, fileElement]) => {
       return fileElement.path === document.uri.path;
-    }) as [Number, any];
+    }) as [string, FileInfo];
 
     const fileId = Number(fileIdKey);
 

@@ -47,26 +47,26 @@ type NargoTests = {
   }[];
 };
 
-type FileId = number;
-type FileInfo = {
+export type FileId = number;
+export type FileInfo = {
   path: string;
   source: string;
 };
 
-type Span = {
+export type Span = {
   start: number;
   end: number;
 };
-type SpanInFile = {
+export type SpanInFile = {
   file: FileId;
   span: Span;
 };
-type OpcodesCounts = {
+export type OpcodesCounts = {
   acir_size: number;
   brillig_size: number;
 };
 
-type NargoProfileRunResult = {
+export type NargoProfileRunResult = {
   file_map: Map<FileId, FileInfo>;
   opcodes_counts: [[SpanInFile, OpcodesCounts]];
 };
