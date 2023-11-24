@@ -32,21 +32,8 @@
       {
         "command": "noir.restart",
         "title": "Noir: Restart Language Server"
-      },
-      {
-        "command": "nargo.profile.hide",
-        "title": "Noir: Hide Profile information",
-        "when": "noir.profileInfoPresent == true"
       }
     ],
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "nargo.profile.hide",
-          "when": "noir.profileInfoPresent == true"
-        }
-      ]
-    },    
     "snippets": [
       {
         "language": "noir",
@@ -73,17 +60,6 @@
         "path": "./syntaxes/noir.tmLanguage.json"
       }
     ],
-    "keybindings": [{
-      "command": "nargo.profile.hide",
-      "key": "shift+alt+ctrl+n, shift+p",
-      "mac": "shift+alt+cmd+n shift+p",
-      "when": "noir.profileInfoPresent"
-    },
-    {
-      "command": "nargo.profile",
-      "key": "shift+alt+ctrl+n p",
-      "mac": "shift+alt+cmd+n p"
-    }],    
     "configuration": {
       "type": "object",
       "title": "Noir Language Server configuration",
