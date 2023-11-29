@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.8](https://github.com/noir-lang/vscode-noir/compare/v0.0.7...v0.0.8) (2023-11-29)
+
+
+### Features
+
+* add opcodes profile information ([#45](https://github.com/noir-lang/vscode-noir/issues/45)) ([78e529a](https://github.com/noir-lang/vscode-noir/commit/78e529ac0137eda2d98857cc7c7dfa73edab075d))
+
+
+### Bug Fixes
+
+* document handling ([#49](https://github.com/noir-lang/vscode-noir/issues/49)) ([f3d2a54](https://github.com/noir-lang/vscode-noir/commit/f3d2a5415518ba4c6c11510a5a7002be9e07aba1))
+
 ## [0.0.7](https://github.com/noir-lang/vscode-noir/compare/v0.0.6...v0.0.7) (2023-11-18)
 
 
