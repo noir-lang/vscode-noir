@@ -19,6 +19,7 @@
 import {
   workspace,
   commands,
+  debug,
   ExtensionContext,
   Disposable,
   TextDocument,
@@ -35,6 +36,11 @@ import {
   ProcessExecution,
   window,
   ProgressLocation,
+  DebugAdapterDescriptorFactory,
+  DebugAdapterDescriptor,
+  DebugAdapterExecutable,
+  DebugSession,
+  ProviderResult,
 } from "vscode";
 
 import { languageId } from "./constants";
@@ -43,6 +49,19 @@ import findNargo from "./find-nargo";
 import { lspClients, editorLineDecorationManager } from "./noir";
 
 let activeCommands: Map<string, Disposable> = new Map();
+
+class NoirDebugAdapterDescriptorFactory
+  implements DebugAdapterDescriptorFactory
+{
+  createDebugAdapterDescriptor(
+    _session: DebugSession,
+    _executable: DebugAdapterExecutable
+  ): ProviderResult<DebugAdapterDescriptor> {
+    let config = workspace.getConfiguration("noir");
+    let nargoPath = config.get<string | undefined>("nargoPath") || findNargo();
+    return new DebugAdapterExecutable(nargoPath, ["dap"]);
+  }
+}
 
 let activeMutex: Set<string> = new Set();
 
@@ -359,6 +378,13 @@ export async function activate(context: ExtensionContext): Promise<void> {
     const disposable = await didOpenTextDocument(doc);
     context.subscriptions.push(disposable);
   }
+
+  context.subscriptions.push(
+    debug.registerDebugAdapterDescriptorFactory(
+      "noir",
+      new NoirDebugAdapterDescriptorFactory()
+    )
+  );
 }
 
 export async function deactivate(): Promise<void> {

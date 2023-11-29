@@ -98,7 +98,6 @@
           "noir"
         ],
         "label": "Noir Debugging",
-        "program": "./bin/debugadapter.sh",
         "configurationAttributes": {
           "launch": {
             "required": [
