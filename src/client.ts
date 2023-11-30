@@ -25,6 +25,7 @@ import {
 
 import { extensionName, languageId } from "./constants";
 import findNargo from "./find-nargo";
+import { ChildProcess, spawn } from "child_process";
 
 type NargoCapabilities = {
   nargo?: {
@@ -93,15 +94,12 @@ function getLspCommand(uri: Uri) {
 
   let command = config.get<string | undefined>("nargoPath") || findNargo();
   let aztecMacroEnabled = config.get<boolean>('enableAztecMacro');
-  if (aztecMacroEnabled) {
-    command = "AZTEC_MACROS=true " + command;
-  }
   let flags = config.get<string | undefined>("nargoFlags") || "";
 
   // Remove empty strings from the flags list
   let args = ["lsp", ...flags.split(" ")].filter((arg) => arg !== "");
 
-  return [command, args] as const;
+  return [command, args, aztecMacroEnabled] as const;
 }
 
 export default class Client extends LanguageClient {
@@ -118,7 +116,7 @@ export default class Client extends LanguageClient {
   constructor(uri: Uri, workspaceFolder?: WorkspaceFolder) {
     let outputChannel = window.createOutputChannel(extensionName, languageId);
 
-    let [command, args] = getLspCommand(uri);
+    let [command, args, aztecMacroEnabled] = getLspCommand(uri);
 
     let documentSelector: TextDocumentFilter[] = [];
     if (workspaceFolder) {
@@ -142,9 +140,15 @@ export default class Client extends LanguageClient {
       outputChannel,
     };
 
-    let serverOptions: ServerOptions = {
-      command,
-      args,
+    let serverOptions: ServerOptions = () => {
+      const env = aztecMacroEnabled ? { ...process.env, AZTEC_MACROS: 'true' } : { ...process.env };
+
+      // Return a function that spawns the process
+      return new Promise<ChildProcess>((resolve, reject) => {
+        const childProcess = spawn(command, args, { env });
+        childProcess.on('error', reject);
+        resolve(childProcess);
+      });
     };
 
     super(languageId, extensionName, serverOptions, clientOptions);
