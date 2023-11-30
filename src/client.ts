@@ -92,7 +92,10 @@ function getLspCommand(uri: Uri) {
   }
 
   let command = config.get<string | undefined>("nargoPath") || findNargo();
-
+  let aztecMacroEnabled = config.get<boolean>('enableAztecMacro');
+  if (aztecMacroEnabled) {
+    command = "AZTEC_MACROS=true " + command;
+  }
   let flags = config.get<string | undefined>("nargoFlags") || "";
 
   // Remove empty strings from the flags list
