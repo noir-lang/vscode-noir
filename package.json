@@ -95,6 +95,11 @@
           "type": "string",
           "description": "Space-separated list of flags to pass to the nargo CLI"
         },
+        "noir.enableAztecMacro": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enables the Aztec macro feature for compiling aztec contracts"
+        },
         "noir.nargoPath": {
           "scope": "resource",
           "type": "string",
