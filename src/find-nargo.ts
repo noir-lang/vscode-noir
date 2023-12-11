@@ -1,6 +1,6 @@
-import which from "which";
+import which from 'which';
 
-const nargoBinaries = ["nargo"];
+const nargoBinaries = ['nargo'];
 
 export default function findNargo() {
   for (const bin of nargoBinaries) {
@@ -12,5 +12,5 @@ export default function findNargo() {
       // Not found
     }
   }
-  throw new Error("Unable to locate any nargo binary. Did you install it?");
+  throw new Error('Unable to locate any nargo binary. Did you install it?');
 }
