@@ -148,7 +148,7 @@ export default class Client extends LanguageClient {
         childProcess.on('error', reject);
         resolve(childProcess);
       });
-
+    };
 
     super(languageId, extensionName, serverOptions, clientOptions);
 
