@@ -120,8 +120,10 @@
       }
     },
     "configurationDefaults": {
-      "editor.defaultFormatter": "noir-lang.vscode-noir",
-      "editor.formatOnSave":  true
+      "[noir]": {
+        "editor.defaultFormatter": "noir-lang.vscode-noir",
+        "editor.formatOnSave":  true
+      }
     }
   },
   "scripts": {
