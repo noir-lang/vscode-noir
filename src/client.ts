@@ -168,7 +168,7 @@ export default class Client extends LanguageClient {
 
           if (capabilities.nargo.tests.fetch) {
             // TODO: reload a single test if provided as the function argument
-            this.#testController.resolveHandler = async (test) => {
+            this.#testController.resolveHandler = async (_test) => {
               await this.#fetchTests();
             };
             this.#testController.refreshHandler = async (token) => {
@@ -243,7 +243,11 @@ export default class Client extends LanguageClient {
       // but this is fine because the test pass/fail icons are propagated upward
       if (test.parent) {
         // If we have these tests, the server will be able to run them with this message
-        const { id, result, message } = await this.sendRequest<RunTestResult>(
+        const {
+          id: _,
+          result,
+          message,
+        } = await this.sendRequest<RunTestResult>(
           'nargo/tests/run',
           {
             id: test.id,

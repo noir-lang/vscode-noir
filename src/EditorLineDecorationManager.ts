@@ -33,7 +33,7 @@ export class EditorLineDecorationManager extends Disposable {
 
     this.lspClients = lspClients;
 
-    window.onDidChangeActiveTextEditor((editor) => {
+    window.onDidChangeActiveTextEditor((_editor) => {
       this.displayAllTextDecorations();
     });
   }
@@ -48,9 +48,9 @@ export class EditorLineDecorationManager extends Disposable {
 
       if (activeClient?.profileRunResult) {
         // find file which we want to present hints for
-        const [fileIdKey, _] = Object.entries(activeClient.profileRunResult.file_map).find(([fileId, fileElement]) => {
-          return fileElement.path === document.uri.path;
-        }) as [string, FileInfo];
+        const [fileIdKey, _] = Object.entries(activeClient.profileRunResult.file_map).find(
+          ([_fileId, fileElement]) => fileElement.path === document.uri.path,
+        ) as [string, FileInfo];
 
         const fileId = Number(fileIdKey);
 
@@ -87,7 +87,7 @@ export class EditorLineDecorationManager extends Disposable {
         // Count opcodes per line in accumulated collection
         (Object.values(lineAccumulatedOpcodes) as LineAccumulatedOpcodes[]).forEach((lineInfo) => {
           lineInfo.lineOpcodes = lineInfo.ranges.reduce(
-            ({ acir_size, brillig_size }, { range, countInfo }) => {
+            ({ acir_size, brillig_size }, { countInfo }) => {
               acir_size = acir_size + countInfo.acir_size;
               brillig_size = brillig_size + countInfo.brillig_size;
               return { acir_size, brillig_size };
