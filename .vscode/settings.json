@@ -2,9 +2,5 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": [
-    "acir",
-    "brillig",
-    "nargo"
-  ]
+  "cSpell.words": ["acir", "brillig", "nargo"]
 }
