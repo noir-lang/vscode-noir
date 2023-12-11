@@ -44,7 +44,6 @@ import { lspClients, editorLineDecorationManager } from "./noir";
 
 let activeCommands: Map<string, Disposable> = new Map();
 
-
 let activeMutex: Set<string> = new Set();
 
 function mutex(key: string, fn: (...args: unknown[]) => Promise<void>) {
@@ -146,41 +145,39 @@ function registerCommands(uri: Uri) {
     commands$.push(command$);
   }
 
-  
   let profileCommand$ = commands.registerCommand(
     "nargo.profile",
-    async (...args) => {  
+    async (...args) => {
+      window.withProgress(
+        {
+          location: ProgressLocation.Window,
+          cancellable: false,
+          title: "Getting Profile Information",
+        },
+        async (progress) => {
+          progress.report({ increment: 0 });
 
-      window.withProgress({
-        location: ProgressLocation.Window,
-        cancellable: false,
-        title: 'Getting Profile Information'
-    }, async (progress) => {
-        
-        progress.report({  increment: 0 });
-    
-        let workspaceFolder = workspace.getWorkspaceFolder(uri).uri.toString();
-        const activeClient = lspClients.get(workspaceFolder);
-  
-        await activeClient.refreshProfileInfo();
-        editorLineDecorationManager.displayAllTextDecorations();
-      
-        progress.report({ increment: 100 });
-    });
+          let workspaceFolder = workspace
+            .getWorkspaceFolder(uri)
+            .uri.toString();
+          const activeClient = lspClients.get(workspaceFolder);
 
+          await activeClient.refreshProfileInfo();
+          editorLineDecorationManager.displayAllTextDecorations();
+
+          progress.report({ increment: 100 });
+        }
+      );
     }
   );
   commands$.push(profileCommand$);
   let hideProfileInformationCommand$ = commands.registerCommand(
     "nargo.profile.hide",
-    async (...args) => {  
-
+    async (...args) => {
       editorLineDecorationManager.hideDecorations();
-
     }
   );
   commands$.push(hideProfileInformationCommand$);
-
 
   activeCommands.set(file, Disposable.from(...commands$));
 }
