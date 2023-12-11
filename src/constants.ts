@@ -1,3 +1,3 @@
-export let extensionName = "Noir Language Server";
+export const extensionName = 'Noir Language Server';
 
-export let languageId = "noir";
+export const languageId = 'noir';
