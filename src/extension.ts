@@ -41,29 +41,27 @@ import {
   DebugAdapterExecutable,
   DebugSession,
   ProviderResult,
-} from "vscode";
+} from 'vscode';
 
-import { languageId } from "./constants";
-import Client from "./client";
-import findNargo from "./find-nargo";
-import { lspClients, editorLineDecorationManager } from "./noir";
+import { languageId } from './constants';
+import Client from './client';
+import findNargo from './find-nargo';
+import { lspClients, editorLineDecorationManager } from './noir';
 
-let activeCommands: Map<string, Disposable> = new Map();
+const activeCommands: Map<string, Disposable> = new Map();
 
-class NoirDebugAdapterDescriptorFactory
-  implements DebugAdapterDescriptorFactory
-{
+class NoirDebugAdapterDescriptorFactory implements DebugAdapterDescriptorFactory {
   createDebugAdapterDescriptor(
     _session: DebugSession,
-    _executable: DebugAdapterExecutable
+    _executable: DebugAdapterExecutable,
   ): ProviderResult<DebugAdapterDescriptor> {
-    let config = workspace.getConfiguration("noir");
-    let nargoPath = config.get<string | undefined>("nargoPath") || findNargo();
-    return new DebugAdapterExecutable(nargoPath, ["dap"]);
+    const config = workspace.getConfiguration('noir');
+    const nargoPath = config.get<string | undefined>('nargoPath') || findNargo();
+    return new DebugAdapterExecutable(nargoPath, ['dap']);
   }
 }
 
-let activeMutex: Set<string> = new Set();
+const activeMutex: Set<string> = new Set();
 
 function mutex(key: string, fn: (...args: unknown[]) => Promise<void>) {
   return (...args) => {
@@ -76,7 +74,7 @@ function mutex(key: string, fn: (...args: unknown[]) => Promise<void>) {
         // Rethrow on a "next tick" to break out of the promise wrapper
         queueMicrotask(() => {
           throw err;
-        })
+        }),
       )
       .finally(() => {
         activeMutex.delete(key);
@@ -85,9 +83,9 @@ function mutex(key: string, fn: (...args: unknown[]) => Promise<void>) {
 }
 
 function dirpathFromUri(uri: Uri): string {
-  let dirPath = uri.toString();
-  if (!dirPath.endsWith("/")) {
-    return dirPath + "/";
+  const dirPath = uri.toString();
+  if (!dirPath.endsWith('/')) {
+    return dirPath + '/';
   }
   return dirPath;
 }
@@ -107,9 +105,9 @@ function sortWorkspaceFolders(): string[] {
 }
 
 function getOuterMostWorkspaceFolder(folder: WorkspaceFolder): WorkspaceFolder {
-  let sorted = sortWorkspaceFolders();
-  for (let element of sorted) {
-    let dirpath = dirpathFromUri(folder.uri);
+  const sorted = sortWorkspaceFolders();
+  for (const element of sorted) {
+    const dirpath = dirpathFromUri(folder.uri);
     if (dirpath.startsWith(element)) {
       return workspace.getWorkspaceFolder(Uri.parse(element))!;
     }
@@ -117,36 +115,33 @@ function getOuterMostWorkspaceFolder(folder: WorkspaceFolder): WorkspaceFolder {
   return folder;
 }
 
-let INTERNAL_COMMANDS = [
-  { type: "nargo", command: "test", group: TaskGroup.Test },
-  { type: "nargo", command: "compile", group: TaskGroup.Build },
-  { type: "nargo", command: "info", group: TaskGroup.Build },
-  { type: "nargo", command: "execute", group: TaskGroup.Build },
+const INTERNAL_COMMANDS = [
+  { type: 'nargo', command: 'test', group: TaskGroup.Test },
+  { type: 'nargo', command: 'compile', group: TaskGroup.Build },
+  { type: 'nargo', command: 'info', group: TaskGroup.Build },
+  { type: 'nargo', command: 'execute', group: TaskGroup.Build },
 ];
 
 function registerCommands(uri: Uri) {
-  let file = uri.toString();
-  let config = workspace.getConfiguration("noir", uri);
+  const file = uri.toString();
+  const config = workspace.getConfiguration('noir', uri);
 
-  let nargoPath = config.get<string | undefined>("nargoPath") || findNargo();
+  const nargoPath = config.get<string | undefined>('nargoPath') || findNargo();
 
-  let nargoFlags = config.get<string | undefined>("nargoFlags") || [];
+  const nargoFlags = config.get<string | undefined>('nargoFlags') || [];
 
-  let commands$: Disposable[] = [];
-  for (let { type, command, group } of INTERNAL_COMMANDS) {
-    let internalName = `${type}.${command}`;
-    let displayName = `${type} ${command}`;
-    let command$ = commands.registerCommand(internalName, async (...args) => {
-      let task = new Task(
+  const commands$: Disposable[] = [];
+  for (const { type, command, group } of INTERNAL_COMMANDS) {
+    const internalName = `${type}.${command}`;
+    const displayName = `${type} ${command}`;
+    const command$ = commands.registerCommand(internalName, async (...args) => {
+      const task = new Task(
         { type, command },
         TaskScope.Workspace,
         displayName,
         languageId,
-        new ProcessExecution(
-          nargoPath,
-          [command].concat(nargoFlags).concat(args)
-        ),
-        []
+        new ProcessExecution(nargoPath, [command].concat(nargoFlags).concat(args)),
+        [],
       );
       task.group = group;
       // We set `isBackground` to `true` to avoid showing the internal task as "recently used"
@@ -164,46 +159,38 @@ function registerCommands(uri: Uri) {
     commands$.push(command$);
   }
 
-  let profileCommand$ = commands.registerCommand(
-    "nargo.profile",
-    async (...args) => {
-      window.withProgress(
-        {
-          location: ProgressLocation.Window,
-          cancellable: false,
-          title: "Getting Profile Information",
-        },
-        async (progress) => {
-          progress.report({ increment: 0 });
+  const profileCommand$ = commands.registerCommand('nargo.profile', async (..._args) => {
+    window.withProgress(
+      {
+        location: ProgressLocation.Window,
+        cancellable: false,
+        title: 'Getting Profile Information',
+      },
+      async (progress) => {
+        progress.report({ increment: 0 });
 
-          let workspaceFolder = workspace
-            .getWorkspaceFolder(uri)
-            .uri.toString();
-          const activeClient = lspClients.get(workspaceFolder);
+        const workspaceFolder = workspace.getWorkspaceFolder(uri).uri.toString();
+        const activeClient = lspClients.get(workspaceFolder);
 
-          await activeClient.refreshProfileInfo();
-          editorLineDecorationManager.displayAllTextDecorations();
+        await activeClient.refreshProfileInfo();
+        editorLineDecorationManager.displayAllTextDecorations();
 
-          progress.report({ increment: 100 });
-        }
-      );
-    }
-  );
+        progress.report({ increment: 100 });
+      },
+    );
+  });
   commands$.push(profileCommand$);
-  let hideProfileInformationCommand$ = commands.registerCommand(
-    "nargo.profile.hide",
-    async (...args) => {
-      editorLineDecorationManager.hideDecorations();
-    }
-  );
+  const hideProfileInformationCommand$ = commands.registerCommand('nargo.profile.hide', async (..._args) => {
+    editorLineDecorationManager.hideDecorations();
+  });
   commands$.push(hideProfileInformationCommand$);
 
   activeCommands.set(file, Disposable.from(...commands$));
 }
 
 function disposeCommands(uri: Uri) {
-  let file = uri.toString();
-  let commands$ = activeCommands.get(file);
+  const file = uri.toString();
+  const commands$ = activeCommands.get(file);
   commands$.dispose();
 }
 
@@ -224,18 +211,18 @@ function disposeWorkspaceCommands(workspaceFolder: WorkspaceFolder) {
 }
 
 async function addFileClient(uri: Uri) {
-  let file = uri.toString();
+  const file = uri.toString();
   if (!lspClients.has(file)) {
     // Start the client. This will also launch the server
-    let client = new Client(uri);
+    const client = new Client(uri);
     lspClients.set(file, client);
     await client.start();
   }
 }
 
 async function removeFileClient(uri: Uri) {
-  let file = uri.toString();
-  let client = lspClients.get(file);
+  const file = uri.toString();
+  const client = lspClients.get(file);
   if (client) {
     await client.stop();
     lspClients.delete(file);
@@ -243,18 +230,18 @@ async function removeFileClient(uri: Uri) {
 }
 
 async function addWorkspaceClient(workspaceFolder: WorkspaceFolder) {
-  let workspacePath = workspaceFolder.uri.toString();
+  const workspacePath = workspaceFolder.uri.toString();
   if (!lspClients.has(workspacePath)) {
     // Start the client. This will also launch the server
-    let client = new Client(workspaceFolder.uri, workspaceFolder);
+    const client = new Client(workspaceFolder.uri, workspaceFolder);
     lspClients.set(workspacePath, client);
     await client.start();
   }
 }
 
 async function removeWorkspaceClient(workspaceFolder: WorkspaceFolder) {
-  let workspacePath = workspaceFolder.uri.toString();
-  let client = lspClients.get(workspacePath);
+  const workspacePath = workspaceFolder.uri.toString();
+  const client = lspClients.get(workspacePath);
   if (client) {
     await client.stop();
     lspClients.delete(workspacePath);
@@ -262,20 +249,18 @@ async function removeWorkspaceClient(workspaceFolder: WorkspaceFolder) {
 }
 
 async function restartAllClients() {
-  for (let client of lspClients.values()) {
+  for (const client of lspClients.values()) {
     await client.restart();
   }
 }
 
-async function didOpenTextDocument(
-  document: TextDocument
-): Promise<Disposable> {
+async function didOpenTextDocument(document: TextDocument): Promise<Disposable> {
   // We are only interested in language mode text
   if (document.languageId !== languageId) {
     return Disposable.from();
   }
 
-  let uri = document.uri;
+  const uri = document.uri;
   let folder = workspace.getWorkspaceFolder(uri);
   let configHandler;
   if (folder) {
@@ -285,33 +270,30 @@ async function didOpenTextDocument(
     await addWorkspaceClient(folder);
     registerWorkspaceCommands(folder);
 
-    configHandler = mutex(
-      folder.uri.toString(),
-      async (e: ConfigurationChangeEvent) => {
-        if (e.affectsConfiguration("noir.nargoFlags", folder.uri)) {
-          disposeWorkspaceCommands(folder);
-          await removeWorkspaceClient(folder);
-          await addWorkspaceClient(folder);
-          registerWorkspaceCommands(folder);
-        }
-
-        if (e.affectsConfiguration("noir.nargoPath", folder.uri)) {
-          disposeWorkspaceCommands(folder);
-          await removeWorkspaceClient(folder);
-          await addWorkspaceClient(folder);
-          registerWorkspaceCommands(folder);
-        }
-
-        if (e.affectsConfiguration("noir.enableLSP", folder.uri)) {
-          await removeWorkspaceClient(folder);
-          await addWorkspaceClient(folder);
-        }
+    configHandler = mutex(folder.uri.toString(), async (e: ConfigurationChangeEvent) => {
+      if (e.affectsConfiguration('noir.nargoFlags', folder.uri)) {
+        disposeWorkspaceCommands(folder);
+        await removeWorkspaceClient(folder);
+        await addWorkspaceClient(folder);
+        registerWorkspaceCommands(folder);
       }
-    );
+
+      if (e.affectsConfiguration('noir.nargoPath', folder.uri)) {
+        disposeWorkspaceCommands(folder);
+        await removeWorkspaceClient(folder);
+        await addWorkspaceClient(folder);
+        registerWorkspaceCommands(folder);
+      }
+
+      if (e.affectsConfiguration('noir.enableLSP', folder.uri)) {
+        await removeWorkspaceClient(folder);
+        await addWorkspaceClient(folder);
+      }
+    });
   } else {
     // We only want to handle `file:` and `untitled:` schemes because
     // vscode sends `output:` schemes for markdown responses from our LSP
-    if (uri.scheme !== "file" && uri.scheme !== "untitled") {
+    if (uri.scheme !== 'file' && uri.scheme !== 'untitled') {
       return Disposable.from();
     }
 
@@ -319,29 +301,26 @@ async function didOpenTextDocument(
     await addFileClient(uri);
     registerFileCommands(uri);
 
-    configHandler = mutex(
-      uri.toString(),
-      async (e: ConfigurationChangeEvent) => {
-        if (e.affectsConfiguration("noir.nargoFlags", uri)) {
-          disposeFileCommands(uri);
-          await removeFileClient(uri);
-          await addFileClient(uri);
-          registerFileCommands(uri);
-        }
-
-        if (e.affectsConfiguration("noir.nargoPath", uri)) {
-          disposeFileCommands(uri);
-          await removeFileClient(uri);
-          await addFileClient(uri);
-          registerFileCommands(uri);
-        }
-
-        if (e.affectsConfiguration("noir.enableLSP", uri)) {
-          await removeFileClient(uri);
-          await addFileClient(uri);
-        }
+    configHandler = mutex(uri.toString(), async (e: ConfigurationChangeEvent) => {
+      if (e.affectsConfiguration('noir.nargoFlags', uri)) {
+        disposeFileCommands(uri);
+        await removeFileClient(uri);
+        await addFileClient(uri);
+        registerFileCommands(uri);
       }
-    );
+
+      if (e.affectsConfiguration('noir.nargoPath', uri)) {
+        disposeFileCommands(uri);
+        await removeFileClient(uri);
+        await addFileClient(uri);
+        registerFileCommands(uri);
+      }
+
+      if (e.affectsConfiguration('noir.enableLSP', uri)) {
+        await removeFileClient(uri);
+        await addFileClient(uri);
+      }
+    });
   }
 
   return workspace.onDidChangeConfiguration(configHandler);
@@ -355,40 +334,30 @@ async function didChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent) {
   // up when a file is opened
 
   // Remove any clients for workspaces that were closed
-  for (let folder of event.removed) {
+  for (const folder of event.removed) {
     await removeWorkspaceClient(folder);
   }
 }
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  let didOpenTextDocument$ =
-    workspace.onDidOpenTextDocument(didOpenTextDocument);
-  let didChangeWorkspaceFolders$ = workspace.onDidChangeWorkspaceFolders(
-    didChangeWorkspaceFolders
-  );
-  let restart$ = commands.registerCommand("noir.restart", restartAllClients);
+  const didOpenTextDocument$ = workspace.onDidOpenTextDocument(didOpenTextDocument);
+  const didChangeWorkspaceFolders$ = workspace.onDidChangeWorkspaceFolders(didChangeWorkspaceFolders);
+  const restart$ = commands.registerCommand('noir.restart', restartAllClients);
 
-  context.subscriptions.push(
-    didOpenTextDocument$,
-    didChangeWorkspaceFolders$,
-    restart$
-  );
+  context.subscriptions.push(didOpenTextDocument$, didChangeWorkspaceFolders$, restart$);
 
-  for (let doc of workspace.textDocuments) {
+  for (const doc of workspace.textDocuments) {
     const disposable = await didOpenTextDocument(doc);
     context.subscriptions.push(disposable);
   }
 
   context.subscriptions.push(
-    debug.registerDebugAdapterDescriptorFactory(
-      "noir",
-      new NoirDebugAdapterDescriptorFactory()
-    )
+    debug.registerDebugAdapterDescriptorFactory('noir', new NoirDebugAdapterDescriptorFactory()),
   );
 }
 
 export async function deactivate(): Promise<void> {
-  for (let client of lspClients.values()) {
+  for (const client of lspClients.values()) {
     await client.stop();
   }
 }
