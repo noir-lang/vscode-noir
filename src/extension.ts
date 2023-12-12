@@ -159,7 +159,7 @@ function registerCommands(uri: Uri) {
     commands$.push(command$);
   }
 
-  const profileCommand$ = commands.registerCommand('nargo.profile', async (...args) => {
+  const profileCommand$ = commands.registerCommand('nargo.profile', async (..._args) => {
     window.withProgress(
       {
         location: ProgressLocation.Window,
@@ -180,7 +180,7 @@ function registerCommands(uri: Uri) {
     );
   });
   commands$.push(profileCommand$);
-  const hideProfileInformationCommand$ = commands.registerCommand('nargo.profile.hide', async (...args) => {
+  const hideProfileInformationCommand$ = commands.registerCommand('nargo.profile.hide', async (..._args) => {
     editorLineDecorationManager.hideDecorations();
   });
   commands$.push(hideProfileInformationCommand$);
