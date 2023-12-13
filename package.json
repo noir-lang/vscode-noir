@@ -2,7 +2,7 @@
   "name": "vscode-noir",
   "displayName": "Noir Language Support",
   "description": "Noir support for Visual Studio Code",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "publisher": "noir-lang",
   "keywords": [
     "noir",
@@ -122,7 +122,7 @@
     "configurationDefaults": {
       "[noir]": {
         "editor.defaultFormatter": "noir-lang.vscode-noir",
-        "editor.formatOnSave":  true
+        "editor.formatOnSave": true
       }
     }
   },
