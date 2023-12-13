@@ -118,6 +118,12 @@
           "description": "Traces the communication between VS Code and the language server."
         }
       }
+    },
+    "configurationDefaults": {
+      "[noir]": {
+        "editor.defaultFormatter": "noir-lang.vscode-noir",
+        "editor.formatOnSave":  true
+      }
     }
   },
   "scripts": {
