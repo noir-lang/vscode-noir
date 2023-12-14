@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.9](https://github.com/noir-lang/vscode-noir/compare/v0.0.8...v0.0.9) (2023-12-13)
+
+
+### Features
+
+* Added format configuration defaults for noir ([#55](https://github.com/noir-lang/vscode-noir/issues/55)) ([5152918](https://github.com/noir-lang/vscode-noir/commit/51529189194d955785b70335061c4d121c851a98))
+
 ## [0.0.8](https://github.com/noir-lang/vscode-noir/compare/v0.0.7...v0.0.8) (2023-11-29)
 
 
