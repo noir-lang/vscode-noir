@@ -24,7 +24,8 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onLanguage:noir"
+    "onLanguage:noir",
+    "onStartupFinished"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -118,6 +119,16 @@
                 "type": "string",
                 "description": "Name of the prover input to use (default Prover)",
                 "default": "Prover"
+              },
+              "generateAcir": {
+                "type": "boolean",
+                "description": "If true, generate ACIR opcodes instead of Brillig which will be closer to release binaries but less convenient for debugging",
+                "default": false
+              },
+              "skipInstrumentation": {
+                "type": "boolean",
+                "description": "Skips variables debugging instrumentation of code, making debugging less convenient but the resulting binary smaller and closer to production",
+                "default": false
               }
             }
           }
