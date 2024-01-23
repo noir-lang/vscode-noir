@@ -25,7 +25,8 @@
   ],
   "activationEvents": [
     "onLanguage:noir",
-    "onStartupFinished"
+    "onStartupFinished",
+    "onDebug"
   ],
   "main": "./out/extension",
   "contributes": {

@@ -20,7 +20,6 @@ import {
   window,
   workspace,
   commands,
-  debug,
   ExtensionContext,
   Disposable,
   TextDocument,
@@ -35,39 +34,17 @@ import {
   TaskPanelKind,
   TaskGroup,
   ProcessExecution,
-  window,
   ProgressLocation,
-  DebugAdapterDescriptorFactory,
-  DebugConfigurationProvider,
-  CancellationToken,
-  DebugConfiguration,
-  DebugAdapterDescriptor,
-  DebugAdapterExecutable,
-  DebugSession,
-  ProviderResult,
 } from 'vscode';
+
+import { activateDebugger } from './debugger';
 
 import { languageId } from './constants';
 import Client from './client';
 import findNargo from './find-nargo';
-import findNearestPackageFrom from './find-nearest-package';
 import { lspClients, editorLineDecorationManager } from './noir';
 
 const activeCommands: Map<string, Disposable> = new Map();
-
-class NoirDebugAdapterDescriptorFactory implements DebugAdapterDescriptorFactory {
-  createDebugAdapterDescriptor(
-    _session: DebugSession,
-    _executable: DebugAdapterExecutable,
-  ): ProviderResult<DebugAdapterDescriptor> {
-    const config = workspace.getConfiguration('noir');
-
-    const configuredNargoPath = config.get<string | undefined>('nargoPath');
-    const nargoPath = configuredNargoPath || findNargo();
-
-    return new DebugAdapterExecutable(nargoPath, ['dap']);
-  }
-}
 
 const activeMutex: Set<string> = new Set();
 
@@ -359,40 +336,11 @@ export async function activate(context: ExtensionContext): Promise<void> {
     context.subscriptions.push(disposable);
   }
 
-  context.subscriptions.push(
-    debug.registerDebugAdapterDescriptorFactory('noir', new NoirDebugAdapterDescriptorFactory()),
-  );
-
-  context.subscriptions.push(
-    debug.registerDebugConfigurationProvider('noir', new NoirDebugConfigurationProvider()),
-  );
+  activateDebugger(context);
 }
 
 export async function deactivate(): Promise<void> {
   for (const client of lspClients.values()) {
     await client.stop();
-  }
-}
-
-class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
-  resolveDebugConfiguration(folder: WorkspaceFolder | undefined, config: DebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration> {
-    if (config.program || config.request == 'attach')
-      return config;
-
-    if (window.activeTextEditor?.document.languageId != 'noir')
-      return window.showInformationMessage("Select a Noir file to debug").then(_ => {
-        return null;
-      });
-
-    const currentFilePath = window.activeTextEditor.document.uri.fsPath;
-    let currentProject = findNearestPackageFrom(currentFilePath);
-
-    return {
-      type: 'noir',
-      name: 'Noir binary package',
-      request: 'launch',
-      program: currentFilePath,
-      projectFolder: currentProject,
-    }
   }
 }
