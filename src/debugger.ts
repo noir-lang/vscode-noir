@@ -62,7 +62,7 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
     const projectFolder =
       config.projectFolder && config.projectFolder !== ``
         ? config.projectFolder
-        : findNearestPackageFrom(currentFilePath);
+        : findNearestPackageFrom(currentFilePath, outputChannel);
 
     const resolvedConfig = {
       type: config.type || 'noir',

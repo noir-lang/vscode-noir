@@ -10,7 +10,7 @@ import * as fs from 'fs';
  * To reduce the odds of accidentally choosing the wrong Nargo package,
  * end the walk at the root of the current VS Code open files.
  */
-export default function findNearestPackageFolder(program: string): string {
+export default function findNearestPackageFolder(program: string, outputChannel: vscode.OutputChannel): string {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders) {
     throw new Error(`No workspace is currently open in VS Code.`);
@@ -21,16 +21,22 @@ export default function findNearestPackageFolder(program: string): string {
   let currentFolder = path.dirname(program);
 
   try {
-    while (currentFolder !== path.dirname(currentFolder) && !workspaceRoots.includes(currentFolder)) {
+    while (currentFolder !== path.dirname(currentFolder)) {
       const maybeNargoProject = path.join(currentFolder, 'Nargo.toml');
 
       if (fs.existsSync(maybeNargoProject)) {
         return currentFolder;
       }
 
+      if (workspaceRoots.includes(currentFolder)) {
+        break;
+      }
+
       currentFolder = path.dirname(currentFolder);
     }
   } catch (error) {
+    outputChannel.appendLine(`Error looking for Nargo.toml: {error.message}`);
+    outputChannel.show();
     throw new Error(`Could not find a Nargo package associated to this file.`);
   }
 
