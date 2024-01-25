@@ -52,7 +52,10 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
     config: DebugConfiguration,
     _token?: CancellationToken,
   ): ProviderResult<DebugConfiguration> {
-    if (window.activeTextEditor?.document.languageId != 'noir')
+    if (
+      (!config.projectFolder || config.projectFolder === ``) &&
+      window.activeTextEditor?.document.languageId != 'noir'
+    )
       return window.showInformationMessage(`Select a Noir file to debug`);
 
     const currentFilePath = window.activeTextEditor.document.uri.fsPath;
