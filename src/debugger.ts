@@ -55,9 +55,6 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
     if (window.activeTextEditor?.document.languageId != 'noir')
       return window.showInformationMessage(`Select a Noir file to debug`);
 
-    const workspaceConfig = workspace.getConfiguration('noir');
-    const nargoPath = workspaceConfig.get<string | undefined>('nargoPath') || findNargo();
-
     const currentFilePath = window.activeTextEditor.document.uri.fsPath;
     const projectFolder =
       config.projectFolder && config.projectFolder !== ``
@@ -75,6 +72,17 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
       generateAcir: config.generateAcir || false,
       skipInstrumentation: config.skipInstrumentation || false,
     };
+
+    return resolvedConfig;
+  }
+
+  async resolveDebugConfigurationWithSubstitutedVariables(
+    _folder: WorkspaceFolder | undefined,
+    config: DebugConfiguration,
+    _token?: CancellationToken,
+  ): ProviderResult<DebugConfiguration> {
+    const workspaceConfig = workspace.getConfiguration('noir');
+    const nargoPath = workspaceConfig.get<string | undefined>('nargoPath') || findNargo();
 
     outputChannel.clear();
 
@@ -95,21 +103,21 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
       'dap',
       '--preflight-check',
       '--preflight-project-folder',
-      resolvedConfig.projectFolder,
+      config.projectFolder,
       '--preflight-prover-name',
-      resolvedConfig.proverName,
+      config.proverName,
     ];
 
-    if (resolvedConfig.package !== ``) {
+    if (config.package !== ``) {
       preflightArgs.push(`--preflight-package`);
       preflightArgs.push(config.package);
     }
 
-    if (resolvedConfig.generateAcir) {
+    if (config.generateAcir) {
       preflightArgs.push(`--preflight-generate-acir`);
     }
 
-    if (resolvedConfig.skipInstrumentation) {
+    if (config.skipInstrumentation) {
       preflightArgs.push(`--preflight-skip-instrumentation`);
     }
 
@@ -137,7 +145,7 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
       outputChannel.appendLine(`Starting debugger session...`);
     }
 
-    return resolvedConfig;
+    return config;
   }
 }
 
