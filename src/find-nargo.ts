@@ -1,6 +1,6 @@
 import which from 'which';
 
-const nargoBinaries = ['nargo'];
+const nargoBinaries = ['nargo', 'aztec-nargo'];
 
 export default function findNargo() {
   for (const bin of nargoBinaries) {
