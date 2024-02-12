@@ -40,7 +40,7 @@ import {
 import { languageId } from './constants';
 import Client from './client';
 import findNargo from './find-nargo';
-import { lspClients, editorLineDecorationManager } from './noir';
+import { lspClients, editorLineDecorationManager, getNoirStatusBarItem, handleClientStartError } from './noir';
 
 const activeCommands: Map<string, Disposable> = new Map();
 
@@ -246,67 +246,78 @@ async function didOpenTextDocument(document: TextDocument): Promise<Disposable> 
   const uri = document.uri;
   let folder = workspace.getWorkspaceFolder(uri);
   let configHandler;
-  if (folder) {
-    // If we have nested workspace folders we only start a server on the outer most workspace folder.
-    folder = getOuterMostWorkspaceFolder(folder);
 
-    await addWorkspaceClient(folder);
-    registerWorkspaceCommands(folder);
+  try {
+    if (folder) {
+      // If we have nested workspace folders we only start a server on the outer most workspace folder.
+      folder = getOuterMostWorkspaceFolder(folder);
 
-    configHandler = mutex(folder.uri.toString(), async (e: ConfigurationChangeEvent) => {
-      if (e.affectsConfiguration('noir.nargoFlags', folder.uri)) {
-        disposeWorkspaceCommands(folder);
-        await removeWorkspaceClient(folder);
-        await addWorkspaceClient(folder);
-        registerWorkspaceCommands(folder);
+      await addWorkspaceClient(folder);
+
+      let currentLspClient = lspClients.get(folder.uri.toString());
+      let statusBarItem = getNoirStatusBarItem();
+      statusBarItem.tooltip = currentLspClient.command;
+      statusBarItem.show();
+
+      registerWorkspaceCommands(folder);
+
+      configHandler = mutex(folder.uri.toString(), async (e: ConfigurationChangeEvent) => {
+        if (e.affectsConfiguration('noir.nargoFlags', folder.uri)) {
+          disposeWorkspaceCommands(folder);
+          await removeWorkspaceClient(folder);
+          await addWorkspaceClient(folder);
+          registerWorkspaceCommands(folder);
+        }
+
+        if (e.affectsConfiguration('noir.nargoPath', folder.uri)) {
+          disposeWorkspaceCommands(folder);
+          await removeWorkspaceClient(folder);
+          await addWorkspaceClient(folder);
+          registerWorkspaceCommands(folder);
+        }
+
+        if (e.affectsConfiguration('noir.enableLSP', folder.uri)) {
+          await removeWorkspaceClient(folder);
+          await addWorkspaceClient(folder);
+        }
+      });
+    } else {
+      // We only want to handle `file:` and `untitled:` schemes because
+      // vscode sends `output:` schemes for markdown responses from our LSP
+      if (uri.scheme !== 'file' && uri.scheme !== 'untitled') {
+        return Disposable.from();
       }
 
-      if (e.affectsConfiguration('noir.nargoPath', folder.uri)) {
-        disposeWorkspaceCommands(folder);
-        await removeWorkspaceClient(folder);
-        await addWorkspaceClient(folder);
-        registerWorkspaceCommands(folder);
-      }
+      // Each file outside of a workspace gets it's own client
+      await addFileClient(uri);
+      registerFileCommands(uri);
 
-      if (e.affectsConfiguration('noir.enableLSP', folder.uri)) {
-        await removeWorkspaceClient(folder);
-        await addWorkspaceClient(folder);
-      }
-    });
-  } else {
-    // We only want to handle `file:` and `untitled:` schemes because
-    // vscode sends `output:` schemes for markdown responses from our LSP
-    if (uri.scheme !== 'file' && uri.scheme !== 'untitled') {
-      return Disposable.from();
+      configHandler = mutex(uri.toString(), async (e: ConfigurationChangeEvent) => {
+        if (e.affectsConfiguration('noir.nargoFlags', uri)) {
+          disposeFileCommands(uri);
+          await removeFileClient(uri);
+          await addFileClient(uri);
+          registerFileCommands(uri);
+        }
+
+        if (e.affectsConfiguration('noir.nargoPath', uri)) {
+          disposeFileCommands(uri);
+          await removeFileClient(uri);
+          await addFileClient(uri);
+          registerFileCommands(uri);
+        }
+
+        if (e.affectsConfiguration('noir.enableLSP', uri)) {
+          await removeFileClient(uri);
+          await addFileClient(uri);
+        }
+      });
     }
 
-    // Each file outside of a workspace gets it's own client
-    await addFileClient(uri);
-    registerFileCommands(uri);
-
-    configHandler = mutex(uri.toString(), async (e: ConfigurationChangeEvent) => {
-      if (e.affectsConfiguration('noir.nargoFlags', uri)) {
-        disposeFileCommands(uri);
-        await removeFileClient(uri);
-        await addFileClient(uri);
-        registerFileCommands(uri);
-      }
-
-      if (e.affectsConfiguration('noir.nargoPath', uri)) {
-        disposeFileCommands(uri);
-        await removeFileClient(uri);
-        await addFileClient(uri);
-        registerFileCommands(uri);
-      }
-
-      if (e.affectsConfiguration('noir.enableLSP', uri)) {
-        await removeFileClient(uri);
-        await addFileClient(uri);
-      }
-    });
+    return workspace.onDidChangeConfiguration(configHandler);
+  } catch (e) {
+    handleClientStartError(e);
   }
-
-  return workspace.onDidChangeConfiguration(configHandler);
 }
 
 async function didChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent) {

@@ -199,6 +199,10 @@ export default class Client extends LanguageClient {
     });
   }
 
+  get command(): string {
+    return this.#command;
+  }
+
   async refreshProfileInfo() {
     const response = await this.sendRequest<NargoProfileRunResult>('nargo/profile/run', { package: '' });
 
