@@ -254,8 +254,8 @@ async function didOpenTextDocument(document: TextDocument): Promise<Disposable> 
 
       await addWorkspaceClient(folder);
 
-      let currentLspClient = lspClients.get(folder.uri.toString());
-      let statusBarItem = getNoirStatusBarItem();
+      const currentLspClient = lspClients.get(folder.uri.toString());
+      const statusBarItem = getNoirStatusBarItem();
       statusBarItem.tooltip = currentLspClient.command;
       statusBarItem.show();
 

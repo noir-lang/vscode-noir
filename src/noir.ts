@@ -35,7 +35,7 @@ export function handleClientStartError(err: Error) {
     const backgroundColor = new ThemeColor('statusBarItem.errorBackground');
     const foregroundColor = new ThemeColor('statusBarItem.errorForeground');
 
-    let statusBarItem = getNoirStatusBarItem();
+    const statusBarItem = getNoirStatusBarItem();
     statusBarItem.backgroundColor = backgroundColor;
     statusBarItem.color = foregroundColor;
     statusBarItem.tooltip = err.markdownMessage;
