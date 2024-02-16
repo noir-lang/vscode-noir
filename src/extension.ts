@@ -36,11 +36,13 @@ import {
   window,
   ProgressLocation,
 } from 'vscode';
+import os from 'os';
 
 import { languageId } from './constants';
 import Client from './client';
-import findNargo from './find-nargo';
-import { lspClients, editorLineDecorationManager, getNoirStatusBarItem, handleClientStartError } from './noir';
+import findNargo, { findNargoBinaries } from './find-nargo';
+import { lspClients, editorLineDecorationManager } from './noir';
+import { getNoirStatusBarItem, handleClientStartError } from './noir';
 
 const activeCommands: Map<string, Disposable> = new Map();
 
@@ -167,6 +169,15 @@ function registerCommands(uri: Uri) {
     editorLineDecorationManager.hideDecorations();
   });
   commands$.push(hideProfileInformationCommand$);
+
+  const selectNargoPathCommand$ = commands.registerCommand('nargo.config.path.select', async (..._args) => {
+    const homeDir = os.homedir();
+    const foundNargoBinaries = findNargoBinaries(homeDir);
+    const result = await window.showQuickPick(foundNargoBinaries, { placeHolder: 'Select the Nargo binary to use' });
+    const config = workspace.getConfiguration('noir', uri);
+    config.update('nargoPath', result);
+  });
+  commands$.push(selectNargoPathCommand$);
 
   activeCommands.set(file, Disposable.from(...commands$));
 }

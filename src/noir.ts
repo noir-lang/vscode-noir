@@ -16,6 +16,7 @@ export function getNoirStatusBarItem() {
   // we will show/update it depending on file user is working with
   noirStatusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 100);
   noirStatusBarItem.text = 'Nargo';
+  noirStatusBarItem.command = 'nargo.config.path.select';
 
   return noirStatusBarItem;
 }
