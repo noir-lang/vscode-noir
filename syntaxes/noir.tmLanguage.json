@@ -241,7 +241,7 @@
       "patterns": [
         {
           "name": "support.type.nr",
-          "match": "\\b((u|i)\\d+|str|bool|Field)\\b"
+          "match": "\\b((u|i)\\d+|str|bool|field|Field)\\b"
         },
         {
           "name": "support.type.nr",
