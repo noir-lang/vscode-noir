@@ -233,7 +233,7 @@
         },
         {
           "name": "keyword.nr",
-          "match": "\\b(global|comptime|unconstrained|distinct|pub|call_data|return_data|&mut|mut|self|in|as|let)\\b"
+          "match": "\\b(global|comptime|unconstrained|unchecked|distinct|pub|call_data|return_data|&mut|mut|self|in|as|let)\\b"
         }
       ]
     },
