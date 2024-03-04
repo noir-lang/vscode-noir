@@ -1,4 +1,4 @@
-import os, { homedir } from 'os';
+import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import which from 'which';
