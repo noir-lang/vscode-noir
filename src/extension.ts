@@ -176,6 +176,8 @@ function registerCommands(uri: Uri) {
     const result = await window.showQuickPick(foundNargoBinaries, { placeHolder: 'Select the Nargo binary to use' });
     const config = workspace.getConfiguration('noir', uri);
     config.update('nargoPath', result);
+    const statusBarItem = getNoirStatusBarItem();
+    statusBarItem.tooltip = result;
   });
   commands$.push(selectNargoPathCommand$);
 
