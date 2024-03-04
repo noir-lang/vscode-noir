@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.11](https://github.com/noir-lang/vscode-noir/compare/v0.0.10...v0.0.11) (2024-03-04)
+
+
+### Bug Fixes
+
+* update tooltip when selecting nargo binary ([#73](https://github.com/noir-lang/vscode-noir/issues/73)) ([daf62f4](https://github.com/noir-lang/vscode-noir/commit/daf62f4bd9012d9a47f32fae1a37dfdf05467ca3))
+
 ## [0.0.10](https://github.com/noir-lang/vscode-noir/compare/v0.0.9...v0.0.10) (2024-03-04)
 
 
