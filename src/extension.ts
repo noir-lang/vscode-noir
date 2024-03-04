@@ -291,6 +291,11 @@ async function didOpenTextDocument(document: TextDocument): Promise<Disposable> 
           await removeWorkspaceClient(folder);
           await addWorkspaceClient(folder);
         }
+
+        if (e.affectsConfiguration('noir.enableCodeLens', folder.uri)) {
+          await removeWorkspaceClient(folder);
+          await addWorkspaceClient(folder);
+        }
       });
     } else {
       // We only want to handle `file:` and `untitled:` schemes because

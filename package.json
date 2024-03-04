@@ -106,6 +106,12 @@
           "default": true,
           "description": "Enable the language server"
         },
+        "noir.enableCodeLens": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the Code Lens feature of language server. (Compile, Execute, Info, Profile, Run Test links above entry functions and tests)"
+        },
         "noir.trace.server": {
           "scope": "resource",
           "type": "string",
