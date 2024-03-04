@@ -135,14 +135,14 @@ export default class Client extends LanguageClient {
     const config = workspace.getConfiguration('noir', uri);
 
     const enableCodeLens = config.get<boolean>('enableCodeLens');
-  
+
     const clientOptions: LanguageClientOptions = {
       documentSelector,
       workspaceFolder,
       outputChannel,
       initializationOptions: {
-        enableCodeLens
-      }
+        enableCodeLens,
+      },
     };
 
     const serverOptions: ServerOptions = {
