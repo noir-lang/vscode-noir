@@ -2,7 +2,7 @@
   "name": "vscode-noir",
   "displayName": "Noir Language Support",
   "description": "Noir support for Visual Studio Code",
-  "version": "0.0.8",
+  "version": "0.0.11",
   "publisher": "noir-lang",
   "keywords": [
     "noir",
@@ -178,6 +178,12 @@
           "default": true,
           "description": "Enable the language server"
         },
+        "noir.enableCodeLens": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the Code Lens feature of language server. (Compile, Execute, Info, Profile, Run Test links above entry functions and tests)"
+        },
         "noir.trace.server": {
           "scope": "resource",
           "type": "string",
@@ -189,6 +195,11 @@
           "default": "off",
           "description": "Traces the communication between VS Code and the language server."
         }
+      }
+    },
+    "configurationDefaults": {
+      "[noir]": {
+        "editor.defaultFormatter": "noir-lang.vscode-noir"
       }
     }
   },

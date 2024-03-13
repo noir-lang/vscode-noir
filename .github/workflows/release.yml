@@ -25,7 +25,6 @@ jobs:
     needs: release-please
     if: ${{ needs.release-please.outputs.tag-name }}
     runs-on: ubuntu-latest
-    environment: marketplace
     steps:
       - name: Setup Node.js
         uses: actions/setup-node@v3

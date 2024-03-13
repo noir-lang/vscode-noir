@@ -132,10 +132,17 @@ export default class Client extends LanguageClient {
       });
     }
 
+    const config = workspace.getConfiguration('noir', uri);
+
+    const enableCodeLens = config.get<boolean>('enableCodeLens');
+
     const clientOptions: LanguageClientOptions = {
       documentSelector,
       workspaceFolder,
       outputChannel,
+      initializationOptions: {
+        enableCodeLens,
+      },
     };
 
     const serverOptions: ServerOptions = {
@@ -197,6 +204,10 @@ export default class Client extends LanguageClient {
         }
       },
     });
+  }
+
+  get command(): string {
+    return this.#command;
   }
 
   async refreshProfileInfo() {

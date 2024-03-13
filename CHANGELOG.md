@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.0.11](https://github.com/noir-lang/vscode-noir/compare/v0.0.10...v0.0.11) (2024-03-04)
+
+
+### Bug Fixes
+
+* update tooltip when selecting nargo binary ([#73](https://github.com/noir-lang/vscode-noir/issues/73)) ([daf62f4](https://github.com/noir-lang/vscode-noir/commit/daf62f4bd9012d9a47f32fae1a37dfdf05467ca3))
+
+## [0.0.10](https://github.com/noir-lang/vscode-noir/compare/v0.0.9...v0.0.10) (2024-03-04)
+
+
+### Features
+
+* add `unchecked` keyword highlighting ([#72](https://github.com/noir-lang/vscode-noir/issues/72)) ([47e5b3c](https://github.com/noir-lang/vscode-noir/commit/47e5b3c22ef2994ee4028fec93d0fbcc2db5b383))
+* add keyword highlighting for databus visibility keywords ([#68](https://github.com/noir-lang/vscode-noir/issues/68)) ([fe14627](https://github.com/noir-lang/vscode-noir/commit/fe14627ed4ea6dc7c81ebb96eecd4256652ddb1d))
+* **aztec:** search for aztec-nargo on top of nargo bin ([#67](https://github.com/noir-lang/vscode-noir/issues/67)) ([0be02a5](https://github.com/noir-lang/vscode-noir/commit/0be02a573bb48435f36e9517c4b69a2d7b633f96))
+* introduce setting to disable Code Lens feature ([#64](https://github.com/noir-lang/vscode-noir/issues/64)) ([2ef2925](https://github.com/noir-lang/vscode-noir/commit/2ef2925ca9d9d2e3002f0d862a1f3f0c9fb8ef90))
+
+## [0.0.9](https://github.com/noir-lang/vscode-noir/compare/v0.0.8...v0.0.9) (2023-12-13)
+
+
+### Features
+
+* Added format configuration defaults for noir ([#55](https://github.com/noir-lang/vscode-noir/issues/55)) ([5152918](https://github.com/noir-lang/vscode-noir/commit/51529189194d955785b70335061c4d121c851a98))
+
 ## [0.0.8](https://github.com/noir-lang/vscode-noir/compare/v0.0.7...v0.0.8) (2023-11-29)
 
 
