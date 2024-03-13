@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.12](https://github.com/noir-lang/vscode-noir/compare/v0.0.11...v0.0.12) (2024-03-13)
+
+
+### Features
+
+* add support for nargo DAP ([#51](https://github.com/noir-lang/vscode-noir/issues/51)) ([369fa91](https://github.com/noir-lang/vscode-noir/commit/369fa917a34fbf7d5b8c25600df314217955944f))
+
 ## [0.0.11](https://github.com/noir-lang/vscode-noir/compare/v0.0.10...v0.0.11) (2024-03-04)
 
 
