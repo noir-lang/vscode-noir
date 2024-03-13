@@ -24,7 +24,9 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onLanguage:noir"
+    "onLanguage:noir",
+    "onStartupFinished",
+    "onDebug"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -84,6 +86,76 @@
         "command": "nargo.profile",
         "key": "shift+alt+ctrl+n p",
         "mac": "shift+alt+cmd+n p"
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "noir"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "noir",
+        "languages": [
+          "noir"
+        ],
+        "label": "Noir Debugging",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "projectFolder"
+            ],
+            "properties": {
+              "projectFolder": {
+                "type": "string",
+                "description": "Absolute path to the Nargo project directory.",
+                "default": "${workspaceFolder}"
+              },
+              "package": {
+                "type": "string",
+                "description": "Optional name of the binary package to debug",
+                "default": null
+              },
+              "proverName": {
+                "type": "string",
+                "description": "Name of the prover input to use (default Prover)",
+                "default": "Prover"
+              },
+              "generateAcir": {
+                "type": "boolean",
+                "description": "If true, generate ACIR opcodes instead of Brillig which will be closer to release binaries but less convenient for debugging",
+                "default": false
+              },
+              "skipInstrumentation": {
+                "type": "boolean",
+                "description": "Skips variables debugging instrumentation of code, making debugging less convenient but the resulting binary smaller and closer to production",
+                "default": false
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "noir",
+            "request": "launch",
+            "name": "Noir binary package",
+            "projectFolder": "${workspaceFolder}",
+            "proverName": "Prover"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "Noir Debug: Prove package",
+            "description": "A new configuration for debugging a Noir binary package",
+            "body": {
+              "type": "noir",
+              "request": "launch",
+              "name": "Noir binary package",
+              "projectFolder": "${workspaceFolder}",
+              "proverName": "Prover"
+            }
+          }
+        ]
       }
     ],
     "configuration": {

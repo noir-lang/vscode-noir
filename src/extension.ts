@@ -17,6 +17,7 @@
  */
 
 import {
+  window,
   workspace,
   commands,
   ExtensionContext,
@@ -33,10 +34,11 @@ import {
   TaskPanelKind,
   TaskGroup,
   ProcessExecution,
-  window,
   ProgressLocation,
 } from 'vscode';
 import os from 'os';
+
+import { activateDebugger } from './debugger';
 
 import { languageId } from './constants';
 import Client from './client';
@@ -362,6 +364,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
     const disposable = await didOpenTextDocument(doc);
     context.subscriptions.push(disposable);
   }
+
+  activateDebugger(context);
 }
 
 export async function deactivate(): Promise<void> {
