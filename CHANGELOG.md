@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.13](https://github.com/noir-lang/vscode-noir/compare/v0.0.12...v0.0.13) (2024-06-21)
+
+
+### Features
+
+* add language icon for noir files ([#82](https://github.com/noir-lang/vscode-noir/issues/82)) ([6c71a1e](https://github.com/noir-lang/vscode-noir/commit/6c71a1eb3e7de86d808824ae529045ff7e41504f))
+
 ## [0.0.12](https://github.com/noir-lang/vscode-noir/compare/v0.0.11...v0.0.12) (2024-03-13)
 
 
