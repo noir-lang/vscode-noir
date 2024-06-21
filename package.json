@@ -65,6 +65,10 @@
         "extensions": [
           ".nr"
         ],
+        "icon": {
+          "light": "./icons/noir_light.svg",
+          "dark": "./icons/noir_dark.svg"
+        },
         "configuration": "./language-configuration.json"
       }
     ],
