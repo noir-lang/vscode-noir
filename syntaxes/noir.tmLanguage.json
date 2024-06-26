@@ -229,11 +229,11 @@
       "patterns": [
         {
           "name": "keyword.control.nr",
-          "match": "\\b(fn|impl|trait|type|mod|use|struct|if|else|for|constrain)\\b"
+          "match": "\\b(fn|impl|trait|type|mod|use|struct|if|else|for)\\b"
         },
         {
           "name": "keyword.nr",
-          "match": "\\b(global|comptime|unconstrained|unchecked|distinct|pub|call_data|return_data|&mut|mut|self|in|as|let)\\b"
+          "match": "\\b(global|comptime|quote|unsafe|unconstrained|distinct|pub|&mut|mut|self|in|as|let)\\b"
         }
       ]
     },
@@ -241,7 +241,7 @@
       "patterns": [
         {
           "name": "support.type.nr",
-          "match": "\\b((u|i)\\d+|str|bool|Field)\\b"
+          "match": "\\b((u|i)\\d+|str|bool|field|Field)\\b"
         },
         {
           "name": "support.type.nr",
