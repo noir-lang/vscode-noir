@@ -171,6 +171,10 @@ function registerCommands(uri: Uri) {
     editorLineDecorationManager.hideDecorations();
   });
   commands$.push(hideProfileInformationCommand$);
+  const debugCommand$ = commands.registerCommand('nargo.debug.dap', async (..._args) => {
+    return commands.executeCommand('workbench.action.debug.start');
+  });
+  commands$.push(debugCommand$);
 
   const selectNargoPathCommand$ = commands.registerCommand('nargo.config.path.select', async (..._args) => {
     const homeDir = os.homedir();
