@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.14](https://github.com/noir-lang/vscode-noir/compare/v0.0.13...v0.0.14) (2024-09-04)
+
+
+### Features
+
+* remove `distinct` keyword ([#86](https://github.com/noir-lang/vscode-noir/issues/86)) ([2376b85](https://github.com/noir-lang/vscode-noir/commit/2376b85cf7bf78d738cb8e8ecfdd85c44da85ad8))
+
 ## [0.0.13](https://github.com/noir-lang/vscode-noir/compare/v0.0.12...v0.0.13) (2024-06-21)
 
 
