@@ -42,7 +42,7 @@ import { activateDebugger } from './debugger';
 
 import { languageId } from './constants';
 import Client from './client';
-import findNargo, { findNargoBinaries, getNargoPath } from './find-nargo';
+import { findNargoBinaries, getNargoPath } from './find-nargo';
 import { lspClients, editorLineDecorationManager } from './noir';
 import { getNoirStatusBarItem, handleClientStartError } from './noir';
 

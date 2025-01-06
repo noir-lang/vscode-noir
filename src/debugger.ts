@@ -1,7 +1,6 @@
 import {
   debug,
   window,
-  workspace,
   DebugAdapterDescriptorFactory,
   DebugSession,
   DebugAdapterExecutable,
@@ -15,7 +14,7 @@ import {
 } from 'vscode';
 
 import { spawn } from 'child_process';
-import findNargo, { getNargoPath } from './find-nargo';
+import { getNargoPath } from './find-nargo';
 import findNearestPackageFrom from './find-nearest-package';
 
 let outputChannel: OutputChannel;
