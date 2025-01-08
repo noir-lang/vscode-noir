@@ -165,7 +165,6 @@ export default class Client extends LanguageClient {
     this.registerFeature({
       fillClientCapabilities: () => {},
       initialize: (capabilities: ServerCapabilities & NargoCapabilities) => {
-        outputChannel.appendLine(`${JSON.stringify(capabilities)}`);
         if (typeof capabilities.nargo?.tests !== 'undefined') {
           this.#testController = tests.createTestController(
             // We prefix with our ID namespace but we also tie these to the URI since they need to be unique
