@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.14](https://github.com/noir-lang/vscode-noir/compare/v0.0.13...v0.0.14) (2025-01-08)
+
+
+### Features
+
+* expand `${workspaceFolder}` in `nargoPath` setting ([#91](https://github.com/noir-lang/vscode-noir/issues/91)) ([cf4b161](https://github.com/noir-lang/vscode-noir/commit/cf4b16138f9bfed0fc2555bf6b0dfffb8bea6d6e))
+* remove `distinct` keyword ([#86](https://github.com/noir-lang/vscode-noir/issues/86)) ([2376b85](https://github.com/noir-lang/vscode-noir/commit/2376b85cf7bf78d738cb8e8ecfdd85c44da85ad8))
+* some syntax highlighting improvements ([#93](https://github.com/noir-lang/vscode-noir/issues/93)) ([ed74a75](https://github.com/noir-lang/vscode-noir/commit/ed74a757afb0b6da10dd854df2cd5cbd5ab79662))
+
 ## [0.0.13](https://github.com/noir-lang/vscode-noir/compare/v0.0.12...v0.0.13) (2024-06-21)
 
 
