@@ -23,7 +23,7 @@ import {
 } from 'vscode-languageclient/node';
 
 import { extensionName, languageId } from './constants';
-import findNargo from './find-nargo';
+import { getNargoPath } from './find-nargo';
 
 type NargoCapabilities = {
   nargo?: {
@@ -90,7 +90,7 @@ function getLspCommand(uri: Uri) {
     return;
   }
 
-  const command = config.get<string | undefined>('nargoPath') || findNargo();
+  const command = getNargoPath(uri);
 
   const flags = config.get<string | undefined>('nargoFlags') || '';
 

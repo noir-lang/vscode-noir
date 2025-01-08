@@ -1,7 +1,6 @@
 import {
   debug,
   window,
-  workspace,
   DebugAdapterDescriptorFactory,
   DebugSession,
   DebugAdapterExecutable,
@@ -15,7 +14,7 @@ import {
 } from 'vscode';
 
 import { spawn } from 'child_process';
-import findNargo from './find-nargo';
+import { getNargoPath } from './find-nargo';
 import findNearestPackageFrom from './find-nearest-package';
 
 let outputChannel: OutputChannel;
@@ -37,10 +36,7 @@ export class NoirDebugAdapterDescriptorFactory implements DebugAdapterDescriptor
     _session: DebugSession,
     _executable: DebugAdapterExecutable,
   ): ProviderResult<DebugAdapterDescriptor> {
-    const config = workspace.getConfiguration('noir');
-
-    const configuredNargoPath = config.get<string | undefined>('nargoPath');
-    const nargoPath = configuredNargoPath || findNargo();
+    const nargoPath = getNargoPath();
 
     return new DebugAdapterExecutable(nargoPath, ['dap']);
   }
@@ -84,8 +80,7 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
     config: DebugConfiguration,
     _token?: CancellationToken,
   ): ProviderResult<DebugConfiguration> {
-    const workspaceConfig = workspace.getConfiguration('noir');
-    const nargoPath = workspaceConfig.get<string | undefined>('nargoPath') || findNargo();
+    const nargoPath = getNargoPath();
 
     outputChannel.clear();
 

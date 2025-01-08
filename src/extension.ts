@@ -42,7 +42,7 @@ import { activateDebugger } from './debugger';
 
 import { languageId } from './constants';
 import Client from './client';
-import findNargo, { findNargoBinaries } from './find-nargo';
+import { findNargoBinaries, getNargoPath } from './find-nargo';
 import { lspClients, editorLineDecorationManager } from './noir';
 import { getNoirStatusBarItem, handleClientStartError } from './noir';
 
@@ -113,7 +113,7 @@ function registerCommands(uri: Uri) {
   const file = uri.toString();
   const config = workspace.getConfiguration('noir', uri);
 
-  const nargoPath = config.get<string | undefined>('nargoPath') || findNargo();
+  const nargoPath = getNargoPath(uri);
 
   const nargoFlags = config.get<string | undefined>('nargoFlags') || [];
 
