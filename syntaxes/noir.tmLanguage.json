@@ -63,6 +63,21 @@
           ]
         },
         {
+          "name": "string.quoted.double.nr",
+          "begin": "r(#*)\"",
+          "end": "\"(\\1)",
+          "beginCaptures": {
+            "1": {
+              "name": "string.quoted.byte.raw.nr"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "string.quoted.byte.raw.nr"
+            }
+          }
+        },
+        {
           "name": "string.interpolated.nr",
           "begin": "f\"",
           "end": "\"",
