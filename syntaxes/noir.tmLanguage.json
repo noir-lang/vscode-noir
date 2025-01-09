@@ -52,17 +52,15 @@
     },
     "strings": {
       "name": "string.quoted.double.nr",
-      "match": "\"(.*?)(\n|(?<!\\\\)\")",
-      "captures": {
-        "1": {
-          "patterns": [
-            {
-              "name": "constant.character.escape.nr",
-              "match": "\\\\."
-            }
-          ]
-        }
-      }
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [{
+        "include": "#escapes"
+      }]
+    },
+    "escapes": {
+      "name": "constant.character.escape.nr",
+      "match": "\\\\."
     },
     "numeric": {
       "patterns": [
