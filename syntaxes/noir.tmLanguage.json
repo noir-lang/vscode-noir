@@ -51,16 +51,64 @@
       ]
     },
     "strings": {
-      "name": "string.quoted.double.nr",
-      "match": "\"(.*?)(\n|(?<!\\\\)\")",
-      "captures": {
-        "1": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.nr",
+          "begin": "\"",
+          "end": "\"",
           "patterns": [
             {
-              "name": "constant.character.escape.nr",
-              "match": "\\\\."
+              "include": "#string-escapes"
             }
           ]
+        },
+        {
+          "name": "string.quoted.double.nr",
+          "begin": "r(#*)\"",
+          "end": "\"(\\1)",
+          "beginCaptures": {
+            "1": {
+              "name": "string.quoted.byte.raw.nr"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "string.quoted.byte.raw.nr"
+            }
+          }
+        },
+        {
+          "name": "string.interpolated.nr",
+          "begin": "f\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "include": "#interpolated-string-escapes"
+            },
+            {
+              "include": "#interpolations"
+            }
+          ]
+        }
+      ]
+    },
+    "string-escapes": {
+      "name": "constant.character.escape.nr",
+      "match": "\\\\."
+    },
+    "interpolated-string-escapes": {
+      "name": "constant.character.escape.nr",
+      "match": "\\\\.|{{|}}"
+    },
+    "interpolations": {
+      "match": "({)[^\"{}]*(})",
+      "name": "variable.other.nr",
+      "captures": {
+        "1": {
+          "name": "constant.character.nr"
+        },
+        "2": {
+          "name": "constant.character.nr"
         }
       }
     },
