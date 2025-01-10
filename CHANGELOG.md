@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.15](https://github.com/noir-lang/vscode-noir/compare/v0.0.14...v0.0.15) (2025-01-10)
+
+
+### Features
+
+* better syntax highlighting for strings ([#95](https://github.com/noir-lang/vscode-noir/issues/95)) ([16d9956](https://github.com/noir-lang/vscode-noir/commit/16d9956a0031819879d9ef959b8fbbb99d8ac8c2))
+
 ## [0.0.14](https://github.com/noir-lang/vscode-noir/compare/v0.0.13...v0.0.14) (2025-01-08)
 
 
