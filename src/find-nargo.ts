@@ -68,7 +68,7 @@ export default function findNargo() {
 export function getNargoPath(uri: Uri | undefined = undefined): string {
   const config = workspace.getConfiguration('noir', uri);
   let nargoPath = config.get<string | undefined>('nargoPath');
-  if (nargoPath === undefined) {
+  if (nargoPath === undefined || nargoPath.trim().length == 0) {
     return findNargo();
   }
 
