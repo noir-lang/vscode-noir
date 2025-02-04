@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.16](https://github.com/noir-lang/vscode-noir/compare/v0.0.15...v0.0.16) (2025-02-04)
+
+
+### Features
+
+* add `loop`, `enum` and `match` keywords ([#97](https://github.com/noir-lang/vscode-noir/issues/97)) ([1fde58d](https://github.com/noir-lang/vscode-noir/commit/1fde58dff66b91bc757cb80ea86655ebe6ce8ca0))
+
+
+### Bug Fixes
+
+* find nargo in path if `nargoPath` is blank ([#99](https://github.com/noir-lang/vscode-noir/issues/99)) ([73b684a](https://github.com/noir-lang/vscode-noir/commit/73b684a99e40c656ac6f0e161e48d238f64a31ca))
+
 ## [0.0.15](https://github.com/noir-lang/vscode-noir/compare/v0.0.14...v0.0.15) (2025-01-10)
 
 
