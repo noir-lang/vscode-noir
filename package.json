@@ -134,6 +134,16 @@
                 "type": "boolean",
                 "description": "Skips variables debugging instrumentation of code, making debugging less convenient but the resulting binary smaller and closer to production",
                 "default": false
+              },
+              "testName": {
+                "type": "string",
+                "description": "Optional test name to debug",
+                "default": null
+              },
+              "oracleResolver": {
+                "type": "string",
+                "description": "JSON RPC url to solve oracle calls",
+                "default": null
               }
             }
           }
