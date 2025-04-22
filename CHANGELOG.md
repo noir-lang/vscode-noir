@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.17](https://github.com/noir-lang/vscode-noir/compare/v0.0.16...v0.0.17) (2025-04-22)
+
+
+### Features
+
+* **codelens:** trigger debugger on 'Debug test' command ([#3](https://github.com/noir-lang/vscode-noir/issues/3)) ([#100](https://github.com/noir-lang/vscode-noir/issues/100)) ([fca148c](https://github.com/noir-lang/vscode-noir/commit/fca148c9f5570dfbe5426864dff204ed8dd7108d))
+
 ## [0.0.16](https://github.com/noir-lang/vscode-noir/compare/v0.0.15...v0.0.16) (2025-02-04)
 
 
