@@ -70,6 +70,8 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
       proverName: config.proverName || `Prover`,
       generateAcir: config.generateAcir || false,
       skipInstrumentation: config.skipInstrumentation || false,
+      testName: config.testName,
+      oracleResolver: config.oracleResolver,
     };
 
     return resolvedConfig;
@@ -111,6 +113,11 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
       preflightArgs.push(config.package);
     }
 
+    if (config.testName) {
+      preflightArgs.push(`--preflight-test-name`);
+      preflightArgs.push(config.testName);
+    }
+
     if (config.generateAcir) {
       preflightArgs.push(`--preflight-generate-acir`);
     }
@@ -141,6 +148,11 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
       throw new Error(`Error launching debugger. Please inspect the Output pane for more details.`);
     } else {
       outputChannel.appendLine(`Starting debugger session...`);
+      if (config.oracleResolver) {
+        outputChannel.appendLine(`Using oracle resolver target ${config.oracleResolver}`);
+      } else {
+        outputChannel.appendLine(`No oracle resolver set`);
+      }
     }
 
     return config;

@@ -35,6 +35,7 @@ import {
   TaskGroup,
   ProcessExecution,
   ProgressLocation,
+  debug,
 } from 'vscode';
 import os from 'os';
 
@@ -174,7 +175,24 @@ function registerCommands(uri: Uri) {
   const debugCommand$ = commands.registerCommand('nargo.debug.dap', async (..._args) => {
     return commands.executeCommand('workbench.action.debug.start');
   });
+
   commands$.push(debugCommand$);
+  const debugTestCommand$ = commands.registerCommand('nargo.debug.test', async (...args) => {
+    const exactIndex = args.indexOf('--exact');
+    const testName = args.at(exactIndex + 1);
+    const oracleResolver = process.env['TXE_TARGET'];
+    const workspaceFolder = workspace.getWorkspaceFolder(uri);
+    await debug.startDebugging(workspaceFolder, {
+      type: 'noir',
+      request: 'launch',
+      name: 'Noir binary package',
+      projectFolder: '${workspaceFolder}',
+      proverName: 'Prover',
+      ...(testName && { testName }),
+      ...(oracleResolver && { oracleResolver }),
+    });
+  });
+  commands$.push(debugTestCommand$);
 
   const selectNargoPathCommand$ = commands.registerCommand('nargo.config.path.select', async (..._args) => {
     const homeDir = os.homedir();
