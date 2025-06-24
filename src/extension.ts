@@ -20,9 +20,13 @@ import {
   window,
   workspace,
   commands,
+  Event,
+  EventEmitter,
   ExtensionContext,
   Disposable,
   TextDocument,
+  TextDocumentContentProvider,
+  ViewColumn,
   WorkspaceFolder,
   WorkspaceFoldersChangeEvent,
   ConfigurationChangeEvent,
@@ -46,6 +50,8 @@ import Client from './client';
 import { findNargoBinaries, getNargoPath } from './find-nargo';
 import { lspClients, editorLineDecorationManager } from './noir';
 import { getNoirStatusBarItem, handleClientStartError } from './noir';
+
+const NOIR_PROJECT_CONTEXT_NAME = 'inNoirProject';
 
 const activeCommands: Map<string, Disposable> = new Map();
 
@@ -274,6 +280,39 @@ async function restartAllClients() {
   }
 }
 
+async function runNargoExpand() {
+  const tdcp = new (class implements TextDocumentContentProvider {
+    uri = Uri.parse('nargo-expand://expandMacro/[EXPANSION].nr');
+    eventEmitter = new EventEmitter<Uri>();
+
+    async provideTextDocumentContent(_uri: Uri): Promise<string> {
+      const editor = window.activeTextEditor;
+      if (!editor) return 'Not available';
+
+      const document = editor.document;
+      const workspaceFolder = workspace.getWorkspaceFolder(document.uri).uri.toString();
+      const client = lspClients.get(workspaceFolder);
+      if (!client) return 'Not available';
+
+      const position = editor.selection.active;
+      return await client.sendRequest<string>('nargo/expand', {
+        textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(editor.document),
+        position,
+      });
+    }
+
+    get onDidChange(): Event<Uri> {
+      return this.eventEmitter.event;
+    }
+  })();
+
+  workspace.registerTextDocumentContentProvider('nargo-expand', tdcp);
+
+  const document = await workspace.openTextDocument(tdcp.uri);
+  tdcp.eventEmitter.fire(tdcp.uri);
+  await window.showTextDocument(document, ViewColumn.Two, true);
+}
+
 async function didOpenTextDocument(document: TextDocument): Promise<Disposable> {
   // We are only interested in language mode text
   if (document.languageId !== languageId) {
@@ -379,8 +418,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const didOpenTextDocument$ = workspace.onDidOpenTextDocument(didOpenTextDocument);
   const didChangeWorkspaceFolders$ = workspace.onDidChangeWorkspaceFolders(didChangeWorkspaceFolders);
   const restart$ = commands.registerCommand('noir.restart', restartAllClients);
+  const expand$ = commands.registerCommand('nargo.expand', runNargoExpand);
 
-  context.subscriptions.push(didOpenTextDocument$, didChangeWorkspaceFolders$, restart$);
+  context.subscriptions.push(didOpenTextDocument$, didChangeWorkspaceFolders$, restart$, expand$);
 
   for (const doc of workspace.textDocuments) {
     const disposable = await didOpenTextDocument(doc);
@@ -388,10 +428,14 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
 
   activateDebugger(context);
+
+  await commands.executeCommand('setContext', NOIR_PROJECT_CONTEXT_NAME, true);
 }
 
 export async function deactivate(): Promise<void> {
   for (const client of lspClients.values()) {
     await client.stop();
   }
+
+  await commands.executeCommand('setContext', NOIR_PROJECT_CONTEXT_NAME, undefined);
 }
