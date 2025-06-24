@@ -39,6 +39,10 @@
         "command": "nargo.profile.hide",
         "title": "Noir: Hide Profile information",
         "when": "noir.profileInfoPresent == true"
+      },
+      {
+        "command": "nargo.expand",
+        "title": "Noir: `nargo expand` on current package"
       }
     ],
     "menus": {
@@ -46,6 +50,10 @@
         {
           "command": "nargo.profile.hide",
           "when": "noir.profileInfoPresent == true"
+        },
+        {
+          "command": "nargo.expand",
+          "when": "inNoirProject"
         }
       ]
     },
