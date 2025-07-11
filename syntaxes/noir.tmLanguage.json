@@ -276,7 +276,7 @@
       "patterns": [
         {
           "name": "keyword.control.nr",
-          "match": "\\b(fn|impl|trait|type|mod|use|struct|if|else|for|loop|enum|match)\\b"
+          "match": "\\b(fn|impl|trait|type|mod|use|struct|if|else|for|loop|while|enum|match)\\b"
         },
         {
           "name": "keyword.nr",
