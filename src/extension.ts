@@ -240,7 +240,7 @@ async function addFileClient(uri: Uri) {
   const file = uri.toString();
   if (!lspClients.has(file)) {
     // Start the client. This will also launch the server
-    const client = new Client(uri);
+    const client = new Client(uri, undefined, file);
     lspClients.set(file, client);
     await client.start();
   }
@@ -290,8 +290,13 @@ async function runNargoExpand() {
       if (!editor) return 'Not available';
 
       const document = editor.document;
-      const workspaceFolder = workspace.getWorkspaceFolder(document.uri).uri.toString();
-      const client = lspClients.get(workspaceFolder);
+      const workspaceFolder = workspace.getWorkspaceFolder(document.uri);
+      let client: Client;
+      if (workspaceFolder) {
+        client = lspClients.get(workspaceFolder.uri.toString());
+      } else {
+        client = lspClients.get(document.uri.toString());
+      }
       if (!client) return 'Not available';
 
       const position = editor.selection.active;
@@ -365,12 +370,17 @@ async function didOpenTextDocument(document: TextDocument): Promise<Disposable> 
     } else {
       // We only want to handle `file:` and `untitled:` schemes because
       // vscode sends `output:` schemes for markdown responses from our LSP
-      if (uri.scheme !== 'file' && uri.scheme !== 'untitled') {
+      if (uri.scheme !== 'file' && uri.scheme !== 'untitled' && uri.scheme !== 'noir-std') {
         return Disposable.from();
       }
 
       // Each file outside of a workspace gets it's own client
       await addFileClient(uri);
+
+      if (uri.scheme === 'noir-std') {
+        return Disposable.from();
+      }
+
       registerFileCommands(uri);
 
       configHandler = mutex(uri.toString(), async (e: ConfigurationChangeEvent) => {
@@ -401,6 +411,18 @@ async function didOpenTextDocument(document: TextDocument): Promise<Disposable> 
   }
 }
 
+async function didCloseTextDocument(document: TextDocument): Promise<Disposable> {
+  // We are only interested in language mode text
+  if (document.languageId !== languageId) {
+    return Disposable.from();
+  }
+
+  const uri = document.uri;
+  if (uri.scheme === 'noir-std') {
+    await removeFileClient(uri);
+  }
+}
+
 async function didChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent) {
   // Reset the workspace folders so it'll sort them again
   workspaceFolders = [];
@@ -415,12 +437,21 @@ async function didChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent) {
 }
 
 export async function activate(context: ExtensionContext): Promise<void> {
+  registerNoirStdContentProvider();
+
   const didOpenTextDocument$ = workspace.onDidOpenTextDocument(didOpenTextDocument);
+  const didCloseTextDocument$ = workspace.onDidCloseTextDocument(didCloseTextDocument);
   const didChangeWorkspaceFolders$ = workspace.onDidChangeWorkspaceFolders(didChangeWorkspaceFolders);
   const restart$ = commands.registerCommand('noir.restart', restartAllClients);
   const expand$ = commands.registerCommand('nargo.expand', runNargoExpand);
 
-  context.subscriptions.push(didOpenTextDocument$, didChangeWorkspaceFolders$, restart$, expand$);
+  context.subscriptions.push(
+    didOpenTextDocument$,
+    didCloseTextDocument$,
+    didChangeWorkspaceFolders$,
+    restart$,
+    expand$,
+  );
 
   for (const doc of workspace.textDocuments) {
     const disposable = await didOpenTextDocument(doc);
@@ -438,4 +469,18 @@ export async function deactivate(): Promise<void> {
   }
 
   await commands.executeCommand('setContext', NOIR_PROJECT_CONTEXT_NAME, undefined);
+}
+
+function registerNoirStdContentProvider() {
+  const noir_std_provider = new (class implements TextDocumentContentProvider {
+    async provideTextDocumentContent(uri: Uri): Promise<string> {
+      if (lspClients.size == 0) {
+        return 'Not available';
+      }
+      // Any client can answer this request
+      const client: Client = lspClients.values().next().value;
+      return await client.sendRequest<string>('nargo/std-source-code', { uri: uri.toString() });
+    }
+  })();
+  workspace.registerTextDocumentContentProvider('noir-std', noir_std_provider);
 }
