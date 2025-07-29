@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.18](https://github.com/noir-lang/vscode-noir/compare/v0.0.17...v0.0.18) (2025-07-28)
+
+
+### Features
+
+* allow opening noir stdlib files ([#108](https://github.com/noir-lang/vscode-noir/issues/108)) ([e0a6481](https://github.com/noir-lang/vscode-noir/commit/e0a6481cfeee54eb87fed6dcc39c416d83f77c55))
+
 ## [0.0.17](https://github.com/noir-lang/vscode-noir/compare/v0.0.16...v0.0.17) (2025-07-14)
 
 
