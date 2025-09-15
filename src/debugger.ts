@@ -1,7 +1,6 @@
 import {
   debug,
   window,
-  workspace,
   DebugAdapterDescriptorFactory,
   DebugSession,
   DebugAdapterExecutable,
@@ -15,7 +14,7 @@ import {
 } from 'vscode';
 
 import { spawn } from 'child_process';
-import findNargo from './find-nargo';
+import { getNargoPath } from './find-nargo';
 import findNearestPackageFrom from './find-nearest-package';
 
 let outputChannel: OutputChannel;
@@ -37,10 +36,7 @@ export class NoirDebugAdapterDescriptorFactory implements DebugAdapterDescriptor
     _session: DebugSession,
     _executable: DebugAdapterExecutable,
   ): ProviderResult<DebugAdapterDescriptor> {
-    const config = workspace.getConfiguration('noir');
-
-    const configuredNargoPath = config.get<string | undefined>('nargoPath');
-    const nargoPath = configuredNargoPath || findNargo();
+    const nargoPath = getNargoPath();
 
     return new DebugAdapterExecutable(nargoPath, ['dap']);
   }
@@ -74,6 +70,8 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
       proverName: config.proverName || `Prover`,
       generateAcir: config.generateAcir || false,
       skipInstrumentation: config.skipInstrumentation || false,
+      testName: config.testName,
+      oracleResolver: config.oracleResolver,
     };
 
     return resolvedConfig;
@@ -84,8 +82,7 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
     config: DebugConfiguration,
     _token?: CancellationToken,
   ): ProviderResult<DebugConfiguration> {
-    const workspaceConfig = workspace.getConfiguration('noir');
-    const nargoPath = workspaceConfig.get<string | undefined>('nargoPath') || findNargo();
+    const nargoPath = getNargoPath();
 
     outputChannel.clear();
 
@@ -114,6 +111,11 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
     if (config.package !== ``) {
       preflightArgs.push(`--preflight-package`);
       preflightArgs.push(config.package);
+    }
+
+    if (config.testName) {
+      preflightArgs.push(`--preflight-test-name`);
+      preflightArgs.push(config.testName);
     }
 
     if (config.generateAcir) {
@@ -146,6 +148,11 @@ class NoirDebugConfigurationProvider implements DebugConfigurationProvider {
       throw new Error(`Error launching debugger. Please inspect the Output pane for more details.`);
     } else {
       outputChannel.appendLine(`Starting debugger session...`);
+      if (config.oracleResolver) {
+        outputChannel.appendLine(`Using oracle resolver target ${config.oracleResolver}`);
+      } else {
+        outputChannel.appendLine(`No oracle resolver set`);
+      }
     }
 
     return config;

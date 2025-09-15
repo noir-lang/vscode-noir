@@ -9,7 +9,6 @@ import {
   TestItem,
   TestMessage,
   TestController,
-  OutputChannel,
   CancellationToken,
   TestRunRequest,
 } from 'vscode';
@@ -23,7 +22,7 @@ import {
 } from 'vscode-languageclient/node';
 
 import { extensionName, languageId } from './constants';
-import findNargo from './find-nargo';
+import { getNargoPath } from './find-nargo';
 
 type NargoCapabilities = {
   nargo?: {
@@ -90,7 +89,7 @@ function getLspCommand(uri: Uri) {
     return;
   }
 
-  const command = config.get<string | undefined>('nargoPath') || findNargo();
+  const command = getNargoPath(uri);
 
   const flags = config.get<string | undefined>('nargoFlags') || '';
 
@@ -101,19 +100,14 @@ function getLspCommand(uri: Uri) {
 }
 
 export default class Client extends LanguageClient {
-  #uri: Uri;
   #command: string;
-  #args: string[];
-  #output: OutputChannel;
   profileRunResult: NargoProfileRunResult;
   // This function wasn't added until vscode 1.81.0 so fake the type
   #testController: TestController & {
     invalidateTestResults?: (item: TestItem) => void;
   };
 
-  constructor(uri: Uri, workspaceFolder?: WorkspaceFolder) {
-    const outputChannel = window.createOutputChannel(extensionName, languageId);
-
+  constructor(uri: Uri, workspaceFolder?: WorkspaceFolder, file?: string) {
     const [command, args] = getLspCommand(uri);
 
     const documentSelector: TextDocumentFilter[] = [];
@@ -139,12 +133,12 @@ export default class Client extends LanguageClient {
     const clientOptions: LanguageClientOptions = {
       documentSelector,
       workspaceFolder,
-      outputChannel,
       initializationOptions: {
         enableCodeLens,
       },
+      outputChannelName: file ? `${extensionName} (${file})` : `${extensionName}`,
+      traceOutputChannel: file ? null : window.createOutputChannel(`${extensionName} Trace`),
     };
-
     const serverOptions: ServerOptions = {
       command,
       args,
@@ -152,10 +146,7 @@ export default class Client extends LanguageClient {
 
     super(languageId, extensionName, serverOptions, clientOptions);
 
-    this.#uri = uri;
     this.#command = command;
-    this.#args = args;
-    this.#output = outputChannel;
 
     // TODO: Figure out how to do type-safe onNotification
     this.onNotification('nargo/tests/update', (testData: NargoTests) => {
@@ -165,7 +156,6 @@ export default class Client extends LanguageClient {
     this.registerFeature({
       fillClientCapabilities: () => {},
       initialize: (capabilities: ServerCapabilities & NargoCapabilities) => {
-        outputChannel.appendLine(`${JSON.stringify(capabilities)}`);
         if (typeof capabilities.nargo?.tests !== 'undefined') {
           this.#testController = tests.createTestController(
             // We prefix with our ID namespace but we also tie these to the URI since they need to be unique
@@ -309,10 +299,6 @@ export default class Client extends LanguageClient {
   }
 
   async start(): Promise<void> {
-    const command = this.#command;
-    const args = this.#args.join(' ');
-    this.info(`Starting LSP client using command: ${command} ${args}`);
-
     await super.start();
   }
 

@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.0.18](https://github.com/noir-lang/vscode-noir/compare/v0.0.17...v0.0.18) (2025-07-28)
+
+
+### Features
+
+* allow opening noir stdlib files ([#108](https://github.com/noir-lang/vscode-noir/issues/108)) ([e0a6481](https://github.com/noir-lang/vscode-noir/commit/e0a6481cfeee54eb87fed6dcc39c416d83f77c55))
+
+## [0.0.17](https://github.com/noir-lang/vscode-noir/compare/v0.0.16...v0.0.17) (2025-07-14)
+
+
+### Features
+
+* `while` and other syntax highlighting ([#106](https://github.com/noir-lang/vscode-noir/issues/106)) ([47d506c](https://github.com/noir-lang/vscode-noir/commit/47d506cd8048f2d112cf55a43d00590206cb71f3))
+* allow running `nargo expand` ([#104](https://github.com/noir-lang/vscode-noir/issues/104)) ([63e2ce5](https://github.com/noir-lang/vscode-noir/commit/63e2ce56b46595c7c0f84499ddb1c4de6c6a5ae0))
+* **codelens:** trigger debugger on 'Debug test' command ([#3](https://github.com/noir-lang/vscode-noir/issues/3)) ([#100](https://github.com/noir-lang/vscode-noir/issues/100)) ([fca148c](https://github.com/noir-lang/vscode-noir/commit/fca148c9f5570dfbe5426864dff204ed8dd7108d))
+
+## [0.0.16](https://github.com/noir-lang/vscode-noir/compare/v0.0.15...v0.0.16) (2025-02-04)
+
+
+### Features
+
+* add `loop`, `enum` and `match` keywords ([#97](https://github.com/noir-lang/vscode-noir/issues/97)) ([1fde58d](https://github.com/noir-lang/vscode-noir/commit/1fde58dff66b91bc757cb80ea86655ebe6ce8ca0))
+
+
+### Bug Fixes
+
+* find nargo in path if `nargoPath` is blank ([#99](https://github.com/noir-lang/vscode-noir/issues/99)) ([73b684a](https://github.com/noir-lang/vscode-noir/commit/73b684a99e40c656ac6f0e161e48d238f64a31ca))
+
+## [0.0.15](https://github.com/noir-lang/vscode-noir/compare/v0.0.14...v0.0.15) (2025-01-10)
+
+
+### Features
+
+* better syntax highlighting for strings ([#95](https://github.com/noir-lang/vscode-noir/issues/95)) ([16d9956](https://github.com/noir-lang/vscode-noir/commit/16d9956a0031819879d9ef959b8fbbb99d8ac8c2))
+
+## [0.0.14](https://github.com/noir-lang/vscode-noir/compare/v0.0.13...v0.0.14) (2025-01-08)
+
+
+### Features
+
+* expand `${workspaceFolder}` in `nargoPath` setting ([#91](https://github.com/noir-lang/vscode-noir/issues/91)) ([cf4b161](https://github.com/noir-lang/vscode-noir/commit/cf4b16138f9bfed0fc2555bf6b0dfffb8bea6d6e))
+* remove `distinct` keyword ([#86](https://github.com/noir-lang/vscode-noir/issues/86)) ([2376b85](https://github.com/noir-lang/vscode-noir/commit/2376b85cf7bf78d738cb8e8ecfdd85c44da85ad8))
+* some syntax highlighting improvements ([#93](https://github.com/noir-lang/vscode-noir/issues/93)) ([ed74a75](https://github.com/noir-lang/vscode-noir/commit/ed74a757afb0b6da10dd854df2cd5cbd5ab79662))
+
 ## [0.0.13](https://github.com/noir-lang/vscode-noir/compare/v0.0.12...v0.0.13) (2024-06-21)
 
 

@@ -51,16 +51,64 @@
       ]
     },
     "strings": {
-      "name": "string.quoted.double.nr",
-      "match": "\"(.*?)(\n|(?<!\\\\)\")",
-      "captures": {
-        "1": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.nr",
+          "begin": "\"",
+          "end": "\"",
           "patterns": [
             {
-              "name": "constant.character.escape.nr",
-              "match": "\\\\."
+              "include": "#string-escapes"
             }
           ]
+        },
+        {
+          "name": "string.quoted.double.nr",
+          "begin": "r(#*)\"",
+          "end": "\"(\\1)",
+          "beginCaptures": {
+            "1": {
+              "name": "string.quoted.byte.raw.nr"
+            }
+          },
+          "endCaptures": {
+            "1": {
+              "name": "string.quoted.byte.raw.nr"
+            }
+          }
+        },
+        {
+          "name": "string.interpolated.nr",
+          "begin": "f\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "include": "#interpolated-string-escapes"
+            },
+            {
+              "include": "#interpolations"
+            }
+          ]
+        }
+      ]
+    },
+    "string-escapes": {
+      "name": "constant.character.escape.nr",
+      "match": "\\\\."
+    },
+    "interpolated-string-escapes": {
+      "name": "constant.character.escape.nr",
+      "match": "\\\\.|{{|}}"
+    },
+    "interpolations": {
+      "match": "({)[^\"{}]*(})",
+      "name": "variable.other.nr",
+      "captures": {
+        "1": {
+          "name": "constant.character.nr"
+        },
+        "2": {
+          "name": "constant.character.nr"
         }
       }
     },
@@ -99,8 +147,7 @@
           },
           "patterns": [
             {
-              "match": "[a-zA-Z_(::)][a-zA-Z0-9_]*",
-              "name": "support.type.nr"
+              "include": "#code"
             }
           ]
         },
@@ -229,11 +276,11 @@
       "patterns": [
         {
           "name": "keyword.control.nr",
-          "match": "\\b(fn|impl|trait|type|mod|use|struct|if|else|for)\\b"
+          "match": "\\b(fn|impl|trait|type|mod|use|struct|if|else|for|loop|while|enum|match)\\b"
         },
         {
           "name": "keyword.nr",
-          "match": "\\b(global|comptime|quote|unsafe|unconstrained|distinct|pub|&mut|mut|self|in|as|let)\\b"
+          "match": "\\b(global|comptime|quote|unsafe|unconstrained|pub|crate|&mut|mut|self|in|as|let)\\b"
         }
       ]
     },
@@ -248,11 +295,18 @@
           "match": "\\b(_*[A-Z][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*::)\\b"
         },
         {
-          "begin": "\\b([a-z_][a-zA-Z0-9_]*)\\s*\\(",
+          "begin": "\\b([a-z_][a-zA-Z0-9_]*)\\s*(::<(.*)>\\s*)?\\(",
           "end": "\\)",
           "beginCaptures": {
             "1": {
               "name": "support.function.nr"
+            },
+            "2": {
+              "patterns": [
+                {
+                  "include": "#code"
+                }
+              ]
             }
           },
           "patterns": [
@@ -270,16 +324,24 @@
     "--struct-content": {
       "patterns": [
         {
-          "begin": "[a-zA-Z_][a-zA-Z0-9_]*",
-          "end": "([a-zA-Z_][a-zA-Z0-9_]*)|,",
-          "beginCaptures": {
-            "0": {
-              "name": "support.type.property-name.nr"
-            }
-          },
-          "endCaptures": {
+          "match": "(pub|pub\\(.+\\))?\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\s*:\\s*(.+)",
+          "captures": {
             "1": {
-              "name": "support.type.nr"
+              "patterns": [
+                {
+                  "include": "#code"
+                }
+              ]
+            },
+            "2": {
+              "name": "support.type.property-name.nr"
+            },
+            "3": {
+              "patterns": [
+                {
+                  "include": "#code"
+                }
+              ]
             }
           },
           "patterns": [

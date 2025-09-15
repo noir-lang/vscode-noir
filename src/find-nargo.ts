@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import which from 'which';
 import { NargoNotFoundError } from './noir';
-import { MarkdownString } from 'vscode';
+import { MarkdownString, Uri, workspace } from 'vscode';
 
 // List of possible nargo binaries to find on Path
 // We prioritize 'nargo' as the more standard version.
@@ -63,4 +63,16 @@ export default function findNargo() {
 
     throw new NargoNotFoundError(message);
   }
+}
+
+export function getNargoPath(uri: Uri | undefined = undefined): string {
+  const config = workspace.getConfiguration('noir', uri);
+  let nargoPath = config.get<string | undefined>('nargoPath');
+  if (nargoPath === undefined || nargoPath.trim().length == 0) {
+    return findNargo();
+  }
+
+  nargoPath = nargoPath.replace(/\${workspaceFolder}/g, workspace.workspaceFolders[0].uri.fsPath);
+
+  return nargoPath;
 }

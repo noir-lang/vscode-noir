@@ -2,7 +2,7 @@
   "name": "vscode-noir",
   "displayName": "Noir Language Support",
   "description": "Noir support for Visual Studio Code",
-  "version": "0.0.13",
+  "version": "0.0.18",
   "publisher": "noir-lang",
   "keywords": [
     "noir",
@@ -39,6 +39,10 @@
         "command": "nargo.profile.hide",
         "title": "Noir: Hide Profile information",
         "when": "noir.profileInfoPresent == true"
+      },
+      {
+        "command": "nargo.expand",
+        "title": "Noir: `nargo expand` on current package"
       }
     ],
     "menus": {
@@ -46,6 +50,10 @@
         {
           "command": "nargo.profile.hide",
           "when": "noir.profileInfoPresent == true"
+        },
+        {
+          "command": "nargo.expand",
+          "when": "inNoirProject"
         }
       ]
     },
@@ -134,6 +142,16 @@
                 "type": "boolean",
                 "description": "Skips variables debugging instrumentation of code, making debugging less convenient but the resulting binary smaller and closer to production",
                 "default": false
+              },
+              "testName": {
+                "type": "string",
+                "description": "Optional test name to debug",
+                "default": null
+              },
+              "oracleResolver": {
+                "type": "string",
+                "description": "JSON RPC url to solve oracle calls",
+                "default": null
               }
             }
           }

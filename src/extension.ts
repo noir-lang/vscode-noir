@@ -20,9 +20,13 @@ import {
   window,
   workspace,
   commands,
+  Event,
+  EventEmitter,
   ExtensionContext,
   Disposable,
   TextDocument,
+  TextDocumentContentProvider,
+  ViewColumn,
   WorkspaceFolder,
   WorkspaceFoldersChangeEvent,
   ConfigurationChangeEvent,
@@ -35,6 +39,7 @@ import {
   TaskGroup,
   ProcessExecution,
   ProgressLocation,
+  debug,
 } from 'vscode';
 import os from 'os';
 
@@ -42,9 +47,11 @@ import { activateDebugger } from './debugger';
 
 import { languageId } from './constants';
 import Client from './client';
-import findNargo, { findNargoBinaries } from './find-nargo';
+import { findNargoBinaries, getNargoPath } from './find-nargo';
 import { lspClients, editorLineDecorationManager } from './noir';
 import { getNoirStatusBarItem, handleClientStartError } from './noir';
+
+const NOIR_PROJECT_CONTEXT_NAME = 'inNoirProject';
 
 const activeCommands: Map<string, Disposable> = new Map();
 
@@ -113,7 +120,7 @@ function registerCommands(uri: Uri) {
   const file = uri.toString();
   const config = workspace.getConfiguration('noir', uri);
 
-  const nargoPath = config.get<string | undefined>('nargoPath') || findNargo();
+  const nargoPath = getNargoPath(uri);
 
   const nargoFlags = config.get<string | undefined>('nargoFlags') || [];
 
@@ -174,7 +181,24 @@ function registerCommands(uri: Uri) {
   const debugCommand$ = commands.registerCommand('nargo.debug.dap', async (..._args) => {
     return commands.executeCommand('workbench.action.debug.start');
   });
+
   commands$.push(debugCommand$);
+  const debugTestCommand$ = commands.registerCommand('nargo.debug.test', async (...args) => {
+    const exactIndex = args.indexOf('--exact');
+    const testName = args.at(exactIndex + 1);
+    const oracleResolver = process.env['TXE_TARGET'];
+    const workspaceFolder = workspace.getWorkspaceFolder(uri);
+    await debug.startDebugging(workspaceFolder, {
+      type: 'noir',
+      request: 'launch',
+      name: 'Noir binary package',
+      projectFolder: '${workspaceFolder}',
+      proverName: 'Prover',
+      ...(testName && { testName }),
+      ...(oracleResolver && { oracleResolver }),
+    });
+  });
+  commands$.push(debugTestCommand$);
 
   const selectNargoPathCommand$ = commands.registerCommand('nargo.config.path.select', async (..._args) => {
     const homeDir = os.homedir();
@@ -216,7 +240,7 @@ async function addFileClient(uri: Uri) {
   const file = uri.toString();
   if (!lspClients.has(file)) {
     // Start the client. This will also launch the server
-    const client = new Client(uri);
+    const client = new Client(uri, undefined, file);
     lspClients.set(file, client);
     await client.start();
   }
@@ -254,6 +278,44 @@ async function restartAllClients() {
   for (const client of lspClients.values()) {
     await client.restart();
   }
+}
+
+async function runNargoExpand() {
+  const tdcp = new (class implements TextDocumentContentProvider {
+    uri = Uri.parse('nargo-expand://expandMacro/[EXPANSION].nr');
+    eventEmitter = new EventEmitter<Uri>();
+
+    async provideTextDocumentContent(_uri: Uri): Promise<string> {
+      const editor = window.activeTextEditor;
+      if (!editor) return 'Not available';
+
+      const document = editor.document;
+      const workspaceFolder = workspace.getWorkspaceFolder(document.uri);
+      let client: Client;
+      if (workspaceFolder) {
+        client = lspClients.get(workspaceFolder.uri.toString());
+      } else {
+        client = lspClients.get(document.uri.toString());
+      }
+      if (!client) return 'Not available';
+
+      const position = editor.selection.active;
+      return await client.sendRequest<string>('nargo/expand', {
+        textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(editor.document),
+        position,
+      });
+    }
+
+    get onDidChange(): Event<Uri> {
+      return this.eventEmitter.event;
+    }
+  })();
+
+  workspace.registerTextDocumentContentProvider('nargo-expand', tdcp);
+
+  const document = await workspace.openTextDocument(tdcp.uri);
+  tdcp.eventEmitter.fire(tdcp.uri);
+  await window.showTextDocument(document, ViewColumn.Two, true);
 }
 
 async function didOpenTextDocument(document: TextDocument): Promise<Disposable> {
@@ -308,12 +370,17 @@ async function didOpenTextDocument(document: TextDocument): Promise<Disposable> 
     } else {
       // We only want to handle `file:` and `untitled:` schemes because
       // vscode sends `output:` schemes for markdown responses from our LSP
-      if (uri.scheme !== 'file' && uri.scheme !== 'untitled') {
+      if (uri.scheme !== 'file' && uri.scheme !== 'untitled' && uri.scheme !== 'noir-std') {
         return Disposable.from();
       }
 
       // Each file outside of a workspace gets it's own client
       await addFileClient(uri);
+
+      if (uri.scheme === 'noir-std') {
+        return Disposable.from();
+      }
+
       registerFileCommands(uri);
 
       configHandler = mutex(uri.toString(), async (e: ConfigurationChangeEvent) => {
@@ -344,6 +411,18 @@ async function didOpenTextDocument(document: TextDocument): Promise<Disposable> 
   }
 }
 
+async function didCloseTextDocument(document: TextDocument): Promise<Disposable> {
+  // We are only interested in language mode text
+  if (document.languageId !== languageId) {
+    return Disposable.from();
+  }
+
+  const uri = document.uri;
+  if (uri.scheme === 'noir-std') {
+    await removeFileClient(uri);
+  }
+}
+
 async function didChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent) {
   // Reset the workspace folders so it'll sort them again
   workspaceFolders = [];
@@ -358,11 +437,21 @@ async function didChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent) {
 }
 
 export async function activate(context: ExtensionContext): Promise<void> {
+  registerNoirStdContentProvider();
+
   const didOpenTextDocument$ = workspace.onDidOpenTextDocument(didOpenTextDocument);
+  const didCloseTextDocument$ = workspace.onDidCloseTextDocument(didCloseTextDocument);
   const didChangeWorkspaceFolders$ = workspace.onDidChangeWorkspaceFolders(didChangeWorkspaceFolders);
   const restart$ = commands.registerCommand('noir.restart', restartAllClients);
+  const expand$ = commands.registerCommand('nargo.expand', runNargoExpand);
 
-  context.subscriptions.push(didOpenTextDocument$, didChangeWorkspaceFolders$, restart$);
+  context.subscriptions.push(
+    didOpenTextDocument$,
+    didCloseTextDocument$,
+    didChangeWorkspaceFolders$,
+    restart$,
+    expand$,
+  );
 
   for (const doc of workspace.textDocuments) {
     const disposable = await didOpenTextDocument(doc);
@@ -370,10 +459,28 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
 
   activateDebugger(context);
+
+  await commands.executeCommand('setContext', NOIR_PROJECT_CONTEXT_NAME, true);
 }
 
 export async function deactivate(): Promise<void> {
   for (const client of lspClients.values()) {
     await client.stop();
   }
+
+  await commands.executeCommand('setContext', NOIR_PROJECT_CONTEXT_NAME, undefined);
+}
+
+function registerNoirStdContentProvider() {
+  const noir_std_provider = new (class implements TextDocumentContentProvider {
+    async provideTextDocumentContent(uri: Uri): Promise<string> {
+      if (lspClients.size == 0) {
+        return 'Not available';
+      }
+      // Any client can answer this request
+      const client: Client = lspClients.values().next().value;
+      return await client.sendRequest<string>('nargo/std-source-code', { uri: uri.toString() });
+    }
+  })();
+  workspace.registerTextDocumentContentProvider('noir-std', noir_std_provider);
 }
