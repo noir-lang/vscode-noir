@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.19](https://github.com/noir-lang/vscode-noir/compare/v0.0.18...v0.0.19) (2025-09-16)
+
+
+### Features
+
+* LSP lightweight mode ([#111](https://github.com/noir-lang/vscode-noir/issues/111)) ([69d8813](https://github.com/noir-lang/vscode-noir/commit/69d881315eb0dcd156c78d0b1934cf042fb42add))
+
 ## [0.0.18](https://github.com/noir-lang/vscode-noir/compare/v0.0.17...v0.0.18) (2025-07-28)
 
 
