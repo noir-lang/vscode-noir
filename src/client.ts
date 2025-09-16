@@ -129,12 +129,22 @@ export default class Client extends LanguageClient {
     const config = workspace.getConfiguration('noir', uri);
 
     const enableCodeLens = config.get<boolean>('enableCodeLens');
+    const enableInlayHints = config.get<boolean>('enableInlayHints');
+    const enableCompletions = config.get<boolean>('enableCompletions');
+    const enableSignatureHelp = config.get<boolean>('enableSignatureHelp');
+    const enableCodeActions = config.get<boolean>('enableCodeActions');
+    const enableLightweightMode = config.get<boolean>('enableLightweightMode');
 
     const clientOptions: LanguageClientOptions = {
       documentSelector,
       workspaceFolder,
       initializationOptions: {
         enableCodeLens,
+        enableInlayHints,
+        enableCompletions,
+        enableSignatureHelp,
+        enableCodeActions,
+        enableLightweightMode,
       },
       outputChannelName: file ? `${extensionName} (${file})` : `${extensionName}`,
       traceOutputChannel: file ? null : window.createOutputChannel(`${extensionName} Trace`),
