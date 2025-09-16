@@ -206,6 +206,36 @@
           "default": true,
           "description": "Enable the Code Lens feature of language server. (Compile, Execute, Info, Profile, Run Test links above entry functions and tests)"
         },
+        "noir.enableInlayHints": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the Inlay Hints feature of language server. (Shows the type of varaibles)"
+        },
+        "noir.enableCompletions": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the Completions feature of language server. (Suggests variables, methods, etc.)"
+        },
+        "noir.enableSignatureHelp": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the Signature Help feature of language server. (Shows arguments and its types when writing function calls)"
+        },
+        "noir.enableCodeActions": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the Code Actions feature of language server. (Suggests quick fixes)"
+        },
+        "noir.enableLightweightMode": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": false,
+          "description": "Enable the lightweight mode. (Disables code lens, inlay hints, completions, signature help and code actions)"
+        },
         "noir.trace.server": {
           "scope": "resource",
           "type": "string",

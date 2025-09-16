@@ -357,12 +357,15 @@ async function didOpenTextDocument(document: TextDocument): Promise<Disposable> 
           registerWorkspaceCommands(folder);
         }
 
-        if (e.affectsConfiguration('noir.enableLSP', folder.uri)) {
-          await removeWorkspaceClient(folder);
-          await addWorkspaceClient(folder);
-        }
-
-        if (e.affectsConfiguration('noir.enableCodeLens', folder.uri)) {
+        if (
+          e.affectsConfiguration('noir.enableLSP', folder.uri) ||
+          e.affectsConfiguration('noir.enableCodeLens', folder.uri) ||
+          e.affectsConfiguration('noir.enableInlayHints', folder.uri) ||
+          e.affectsConfiguration('noir.enableCompletions', folder.uri) ||
+          e.affectsConfiguration('noir.enableSignatureHelp', folder.uri) ||
+          e.affectsConfiguration('noir.enableCodeActions', folder.uri) ||
+          e.affectsConfiguration('noir.enableLightweightMode', folder.uri)
+        ) {
           await removeWorkspaceClient(folder);
           await addWorkspaceClient(folder);
         }
