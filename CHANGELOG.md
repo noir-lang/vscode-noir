@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.20](https://github.com/noir-lang/vscode-noir/compare/v0.0.19...v0.0.20) (2025-12-03)
+
+
+### Features
+
+* add syntax highlighting for break and continue ([#115](https://github.com/noir-lang/vscode-noir/issues/115)) ([17dc112](https://github.com/noir-lang/vscode-noir/commit/17dc1128f0f8bc791a1c44e91426c50924de65e8))
+
 ## [0.0.19](https://github.com/noir-lang/vscode-noir/compare/v0.0.18...v0.0.19) (2025-09-16)
 
 
