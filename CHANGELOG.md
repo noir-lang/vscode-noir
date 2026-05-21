@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.21](https://github.com/noir-lang/vscode-noir/compare/v0.0.20...v0.0.21) (2026-05-21)
+
+
+### Features
+
+* onEnterRules and some autoclosing ([#122](https://github.com/noir-lang/vscode-noir/issues/122)) ([cd75605](https://github.com/noir-lang/vscode-noir/commit/cd75605aa43c510cddcbdd1118f5142e5009dcaa))
+
 ## [0.0.20](https://github.com/noir-lang/vscode-noir/compare/v0.0.19...v0.0.20) (2025-12-03)
 
 
