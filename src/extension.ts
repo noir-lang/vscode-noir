@@ -178,21 +178,40 @@ function registerCommands(uri: Uri) {
     editorLineDecorationManager.hideDecorations();
   });
   commands$.push(hideProfileInformationCommand$);
-  const debugCommand$ = commands.registerCommand('nargo.debug.dap', async (..._args) => {
-    return commands.executeCommand('workbench.action.debug.start');
-  });
-
-  commands$.push(debugCommand$);
-  const debugTestCommand$ = commands.registerCommand('nargo.debug.test', async (...args) => {
-    const exactIndex = args.indexOf('--exact');
-    const testName = args.at(exactIndex + 1);
+  const debugCommand$ = commands.registerCommand('nargo.debug.dap', async (...args) => {
+    const programDirIndex = args.indexOf('--program-dir');
+    const projectFolder = programDirIndex >= 0 ? args[programDirIndex + 1] : undefined;
+    const packageIndex = args.indexOf('--package');
+    const packageName = packageIndex >= 0 ? args[packageIndex + 1] : undefined;
     const oracleResolver = process.env['TXE_TARGET'];
     const workspaceFolder = workspace.getWorkspaceFolder(uri);
     await debug.startDebugging(workspaceFolder, {
       type: 'noir',
       request: 'launch',
       name: 'Noir binary package',
-      projectFolder: '${workspaceFolder}',
+      ...(projectFolder && { projectFolder }),
+      ...(packageName && { package: packageName }),
+      proverName: 'Prover',
+      ...(oracleResolver && { oracleResolver }),
+    });
+  });
+
+  commands$.push(debugCommand$);
+  const debugTestCommand$ = commands.registerCommand('nargo.debug.test', async (...args) => {
+    const programDirIndex = args.indexOf('--program-dir');
+    const projectFolder = programDirIndex >= 0 ? args[programDirIndex + 1] : undefined;
+    const packageIndex = args.indexOf('--package');
+    const packageName = packageIndex >= 0 ? args[packageIndex + 1] : undefined;
+    const exactIndex = args.indexOf('--exact');
+    const testName = exactIndex >= 0 ? args[exactIndex + 1] : undefined;
+    const oracleResolver = process.env['TXE_TARGET'];
+    const workspaceFolder = workspace.getWorkspaceFolder(uri);
+    await debug.startDebugging(workspaceFolder, {
+      type: 'noir',
+      request: 'launch',
+      name: 'Noir binary package',
+      ...(projectFolder && { projectFolder }),
+      ...(packageName && { package: packageName }),
       proverName: 'Prover',
       ...(testName && { testName }),
       ...(oracleResolver && { oracleResolver }),
